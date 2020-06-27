@@ -54,23 +54,27 @@ tmp<volScalarField> WrayAgarval2018<BasicTurbulenceModel>::Fmi
     return chi3/(chi3 + pow3(this->Cw_));
 }
 
-/*
-template<class BasicTurbulenceModel>j
+
+template<class BasicTurbulenceModel>
 tmp<volScalarField> WrayAgarval2018<BasicTurbulenceModel>::F1
 (
- 	const volScalarField& S
+ 	const volScalarField& S,
  	const volScalarField& W
 )
 {
-	volScalarField k = this->nut * S / sqrt(Cmu_);
+	volScalarField k = this->nut_ * S / sqrt(Cmu_);
 	volScalarField w = S / sqrt(Cmu_);
-	volScalarField eta = S * max( 1, fabs(W / S) );
+	volScalarField eta = S * max(1.0 , mag(W / S));
 
-	volScalarField arg1 = 0.5 * (this->nu() + R_) * sqr(eta) / (Cmu_ * k * w);
+	volScalarField arg1 = 0.5 * (this->nu() + this->R_) * sqr(eta) / 
+                          max(Cmu_ * k * w,
+                              dimensionedScalar("SMALL", 
+                                            dimensionSet(0, 2, -3, 0 ,0,0,0),       
+                                            SMALL));
 	
 	return tanh(pow(arg1, 4));
 }
-*/
+
 
 /*
 template<class BasicTurbulenceModel>
@@ -90,7 +94,6 @@ tmp<volScalarField> WrayAgarval2018<BasicTurbulenceModel>::F1
 	
 	return tanh(pow(arg1, 4));
 }
-*/
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> WrayAgarval2018<BasicTurbulenceModel>::F1
@@ -102,11 +105,13 @@ tmp<volScalarField> WrayAgarval2018<BasicTurbulenceModel>::F1
     volScalarField eta = S * max(1.0, mag(W/S));
     volScalarField Om = S / sqrt(Cmu_);
     volScalarField k = this->nut_ * Om;
-	volScalarField arg1 = (this->nut_ + this->R_) / 2 * sqr(eta) / (Cmu_ * k * Om); 
+    
+	volScalarField arg1 = (this->nut_ + this->R_) / 2. * sqr(eta) / (Cmu_  * k *  Om); 
 
 	return tanh(pow(arg1, 4));
 }
 
+*/
 template<class BasicTurbulenceModel>
 void WrayAgarval2018<BasicTurbulenceModel>::correctNut
 (
@@ -347,10 +352,10 @@ void WrayAgarval2018<BasicTurbulenceModel>::correct()
 		dimensionedScalar("1e-16", inv(dimTime), 1e-16)
 	    );
 
-    const volScalarField W_ = sqrt(2 * skew(gradU) && skew(gradU));
+    const volScalarField W = sqrt(2 * skew(gradU) && skew(gradU));
 
 
-    const volScalarField F1 = this->F1(S, W_);
+    const volScalarField F1 = this->F1(S, W);
     const volScalarField nuEff = this->nuEff(F1);
     const volScalarField Fmi = this->Fmi(this->chi());
 
@@ -358,8 +363,8 @@ void WrayAgarval2018<BasicTurbulenceModel>::correct()
     volScalarField CD_RS = fvc::grad(R_) & fvc::grad(S);
     volScalarField SS_RR = min
                            (
-                            C2kEps_ * R_ * magSqr(fvc::grad(S)) / sqr(S),
-                            Cm_ * magSqr(fvc::grad(R_)) / R_
+                            C2kEps_ * R_  * R_ * magSqr(fvc::grad(S)) / sqr(S),
+                            Cm_ * magSqr(fvc::grad(R_)) 
                             );
 
     
@@ -371,7 +376,7 @@ void WrayAgarval2018<BasicTurbulenceModel>::correct()
      ==
         alpha * rho * fvm::SuSp(C1 * S, R_)
       + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
-      - alpha * rho * (1 - F1) * fvm::SuSp(SS_RR, R_)
+      - alpha * rho * (1 - F1) * SS_RR
     );
 
     REqn.ref().relax();
