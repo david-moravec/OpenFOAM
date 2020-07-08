@@ -1,3 +1,0 @@
-mykOmegaTNT.C
-
-LIB = $(FOAM_USER_LIBBIN)/libmyTurbulenceModels

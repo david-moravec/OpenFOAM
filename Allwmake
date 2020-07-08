@@ -1,0 +1,2 @@
+wmake libso turbulenceModels
+wmake libso incompressible

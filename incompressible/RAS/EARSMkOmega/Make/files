@@ -1,3 +1,0 @@
-EARSMkOmega.C
-
-LIB = $(FOAM_USER_LIBBIN)/EARSMkOmega
