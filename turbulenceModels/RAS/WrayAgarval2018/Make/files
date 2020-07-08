@@ -1,3 +1,0 @@
-WrayAgarval2018.C
-
-LIB = $(FOAM_USER_LIBBIN)/WrayAgarval2018
