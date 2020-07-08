@@ -1,3 +1,0 @@
-kOmegaTNT.C
-
-LIB = $(FOAM_USER_LIBBIN)/kOmegaFTNT
