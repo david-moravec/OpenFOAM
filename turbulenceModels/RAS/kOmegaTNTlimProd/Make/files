@@ -1,0 +1,3 @@
+kOmegaTNTlimProd.C
+
+LIB = $(FOAM_USER_LIBBIN)/kOmegaTNTlimProd
