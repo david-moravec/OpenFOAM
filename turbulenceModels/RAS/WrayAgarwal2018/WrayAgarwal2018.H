@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::WrayAgarval2018
+    Foam::RASModels::WrayAgarwal2018
 
 Description
-       WrayAgarval2018Coeffs
+       WrayAgarwal2018Coeffs
         {
             sigmakW      0.72;
             sigmakEps    1.0;
@@ -39,12 +39,12 @@ Description
     \endverbatim
 
 SourceFiles
-    WrayAgarval2018.C
+    WrayAgarwal2018.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WrayAgarval2018_H
-#define WrayAgarval2018_H
+#ifndef WrayAgarwal2018_H
+#define WrayAgarwal2018_H
 
 #include "RASModel.H"
 #include "eddyViscosity.H"
@@ -57,11 +57,11 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class WrayAgarval2018 Declaration
+                      Class WrayAgarwal2018 Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class WrayAgarval2018
+class WrayAgarwal2018
 :
     public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
@@ -115,13 +115,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("WrayAgarval2018");
+    TypeName("WrayAgarwal2018");
 
 
     // Constructors
 
         //- Construct from components
-        WrayAgarval2018
+        WrayAgarwal2018
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -134,11 +134,11 @@ public:
         );
 
         //- Disallow default bitwise copy construction
-        WrayAgarval2018(const WrayAgarval2018&) = delete;
+        WrayAgarwal2018(const WrayAgarwal2018&) = delete;
 
 
     //- Destructor
-    virtual ~WrayAgarval2018()
+    virtual ~WrayAgarwal2018()
     {}
 
 
@@ -163,7 +163,7 @@ public:
     // Member Operators
 
         //- Disallow default bitwise assignment
-        void operator=(const WrayAgarval2018&) = delete;
+        void operator=(const WrayAgarwal2018&) = delete;
 };
 
 
@@ -173,7 +173,10 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+#ifdef NoRepository
+#   include "WrayAgarwal2018.C"
+#endif
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif
 
 // ************************************************************************* //

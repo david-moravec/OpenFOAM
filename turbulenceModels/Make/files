@@ -1,1 +1,1 @@
-LIB = $(FOAM_USER_LIBBIN)/myIncompressibleTurbModels
+LIB = $(FOAM_USER_LIBBIN)/myIncompressibleTurbulenceModels

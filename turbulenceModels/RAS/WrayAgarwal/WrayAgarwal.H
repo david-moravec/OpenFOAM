@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::WrayAgarval
+    Foam::RASModels::WrayAgarwal
 
 Description
-       WrayAgarvalCoeffs
+       WrayAgarwalCoeffs
         {
             sigmakW      0.72;
             sigmakEps    1.0;
@@ -38,12 +38,12 @@ Description
     \endverbatim
 
 SourceFiles
-    WrayAgarval.C
+    WrayAgarwal.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WrayAgarval_H
-#define WrayAgarval_H
+#ifndef WrayAgarwal_H
+#define WrayAgarwal_H
 
 #include "RASModel.H"
 #include "eddyViscosity.H"
@@ -56,11 +56,11 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class WrayAgarval Declaration
+                      Class WrayAgarwal Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class WrayAgarval
+class WrayAgarwal
 :
     public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
@@ -112,13 +112,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("WrayAgarval");
+    TypeName("WrayAgarwal");
 
 
     // Constructors
 
         //- Construct from components
-        WrayAgarval
+        WrayAgarwal
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -131,11 +131,11 @@ public:
         );
 
         //- Disallow default bitwise copy construction
-        WrayAgarval(const WrayAgarval&) = delete;
+        WrayAgarwal(const WrayAgarwal&) = delete;
 
 
     //- Destructor
-    virtual ~WrayAgarval()
+    virtual ~WrayAgarwal()
     {}
 
 
@@ -160,7 +160,7 @@ public:
     // Member Operators
 
         //- Disallow default bitwise assignment
-        void operator=(const WrayAgarval&) = delete;
+        void operator=(const WrayAgarwal&) = delete;
 };
 
 
@@ -170,7 +170,10 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+#ifdef NoRepository
+#   include "WrayAgarwal.C"
+#endif
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif
 
 // ************************************************************************* //

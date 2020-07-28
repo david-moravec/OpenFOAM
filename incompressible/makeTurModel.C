@@ -31,7 +31,7 @@ License
 #include "laminarModel.H"
 #include "RASModel.H"
 #include "LESModel.H"
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * /mespace Foam {
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 namespace Foam {
   typedef TurbulenceModel<
       geometricOneField,
@@ -66,5 +66,8 @@ namespace Foam {
 #include "kOmegaTNT.H"
 makeRASModel(kOmegaTNT);
 
-#include "WrayAgarval.H"
-makeRASModel(WrayAgarval);
+#include "WrayAgarwal.H"
+makeRASModel(WrayAgarwal);
+
+#include "WrayAgarwal2018.H"
+makeRASModel(WrayAgarwal2018);
