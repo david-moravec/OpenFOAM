@@ -101,7 +101,7 @@ protected:
         (
             const volScalarField& S,
             const volScalarField& W
-        );
+        ) const;
 
         void correctNut(const volScalarField& fv1);
         virtual void correctNut();

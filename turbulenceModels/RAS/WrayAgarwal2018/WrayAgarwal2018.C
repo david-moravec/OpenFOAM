@@ -44,7 +44,7 @@ tmp<volScalarField> WrayAgarwal2018<BasicTurbulenceModel>::chi() const
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwal2018<BasicTurbulenceModel>::Fmi
+tmp<volScalarField> WrayAgarwal2018<BasicTurbulenceModel>::Fmi 
 (
     const volScalarField& chi
 ) const
@@ -55,11 +55,11 @@ tmp<volScalarField> WrayAgarwal2018<BasicTurbulenceModel>::Fmi
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwal2018<BasicTurbulenceModel>::F1
+tmp<volScalarField> WrayAgarwal2018<BasicTurbulenceModel>::F1 
 (
  	const volScalarField& S,
  	const volScalarField& W
-)
+) const
 {
 	volScalarField k = this->nut_ * S / sqrt(Cmu_);
 	volScalarField w = S / sqrt(Cmu_);
@@ -358,9 +358,9 @@ void WrayAgarwal2018<BasicTurbulenceModel>::correct()
     const volScalarField nuEff = this->nuEff(F1);
     const volScalarField Fmi = this->Fmi(this->chi());
 
-    volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kEps_;
-    volScalarField CD_RS = fvc::grad(R_) & fvc::grad(S);
-    volScalarField SS_RR = min
+    const volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kEps_;
+    const volScalarField CD_RS = fvc::grad(R_) & fvc::grad(S);
+    const volScalarField SS_RR = min
                            (
                             C2kEps_ * R_  * R_ * magSqr(fvc::grad(S)) / sqr(S),
                             Cm_ * magSqr(fvc::grad(R_)) 
@@ -371,7 +371,7 @@ void WrayAgarwal2018<BasicTurbulenceModel>::correct()
     (
         fvm::ddt(alpha, rho, R_)
       + fvm::div(alphaRhoPhi, R_)
-      - fvm::laplacian(nuEff, R_)
+      - fvm::laplacian(alpha * rho * nuEff, R_)
      ==
         alpha * rho * fvm::SuSp(C1 * S, R_)
       + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
