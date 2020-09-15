@@ -69,15 +69,15 @@ protected:
     // Protected data
 
         // Model coefficients
-            dimensionedScalar sigmakOm_;
-            dimensionedScalar sigmakEps_;
-            dimensionedScalar kappa_;
             dimensionedScalar C1kOm_;
             dimensionedScalar C1kEps_;
             dimensionedScalar C2kOm_;
             dimensionedScalar C2kEps_;
-            dimensionedScalar Cw_;
+            dimensionedScalar sigmakOm_;
+            dimensionedScalar sigmakEps_;
+            dimensionedScalar kappa_;
             dimensionedScalar Cmu_;
+            dimensionedScalar Cw_;
 
         // Fields
 

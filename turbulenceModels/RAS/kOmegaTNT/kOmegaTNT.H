@@ -86,7 +86,7 @@ protected:
             dimensionedScalar gamma_;
             dimensionedScalar alphaK_;
             dimensionedScalar alphaOmega_;
-	    dimensionedScalar alphaD_;
+	        dimensionedScalar alphaD_;
 
 
         // Fields

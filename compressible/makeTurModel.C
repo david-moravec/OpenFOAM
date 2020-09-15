@@ -23,41 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IncompressibleTurbulenceModel.H"
-#include "incompressible/transportModel/transportModel.H"
+#include "CompressibleTurbulenceModel.H"
+#include "compressibleTransportModel.H"
+#include "fluidThermo.H"
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 
+#include "ThermalDiffusivity.H"
+#include "EddyDiffusivity.H"
+
 #include "laminarModel.H"
 #include "RASModel.H"
-#include "LESModel.H"
+//#include "LESModel.H"
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 namespace Foam {
   typedef TurbulenceModel<
       geometricOneField,
-      geometricOneField,
-      incompressibleTurbulenceModel,
-      transportModel
-      > transportModelincompressibleTurbulenceModel;
+      volScalarField,
+      compressibleTurbulenceModel,
+      fluidThermo
+      > fluidThermocompressibleTurbulenceModel;
                         
-  typedef IncompressibleTurbulenceModel<transportModel> 
-  transportModelIncompressibleTurbulenceModel;
-                            
-  typedef RASModel<transportModelIncompressibleTurbulenceModel> 
-  RAStransportModelIncompressibleTurbulenceModel; 
-                                
-  typedef LESModel<transportModelIncompressibleTurbulenceModel> 
-  LEStransportModelIncompressibleTurbulenceModel; 
                                     
+  typedef ThermalDiffusivity< CompressibleTurbulenceModel<fluidThermo> >
+  fluidThermoCompressibleTurbulenceModel;
+
+  typedef RASModel< EddyDiffusivity<fluidThermoCompressibleTurbulenceModel> >
+  RASfluidThermoCompressibleTurbulenceModel;
 }
-                                    
-#define makeRASModel(Type)                                                 \
-    makeTemplatedTurbulenceModel                                           \
-    (transportModelIncompressibleTurbulenceModel, RAS, Type)
-                                            
-#define makeLESModel(Type)                                                     \
+
+#define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
-    (transportModelIncompressibleTurbulenceModel, LES, Type)
+    (fluidThermoCompressibleTurbulenceModel, RAS, Type)
 
 // -------------------------------------------------------------------------- //
 // RAS models

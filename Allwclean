@@ -1,2 +1,3 @@
 wclean libso turbulenceModels
 wclean libso incompressible
+wclean libso compressible
