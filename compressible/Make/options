@@ -1,5 +1,6 @@
 EXE_INC = \
     -I../turbulenceModels/lnInclude \
+    -I../turbulenceModels/Base/WrayAgarwal \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \

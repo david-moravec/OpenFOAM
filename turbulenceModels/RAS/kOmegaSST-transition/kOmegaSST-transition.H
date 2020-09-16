@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Copyright (C) 2011-2019 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,30 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::WrayAgarwal
+    Foam::RASModels::kOmegaSST-transition
 
 Description
-       WrayAgarwalCoeffs
-        {
-            sigmakW      0.72;
-            sigmakEps    1.0;
-            kappa        0.41;
-            C1kOm        0.0829;
-            C1kEps       0.1127;
-            Cw           8.54;
-            Cmu          0.09;
-        }
-    \endverbatim
+    Specialisation for RAS of the generic kOmegaSST-transitionBase base class.
+    For more information, see Description of kOmegaSST-transitionBase.H
+
+See also
+    Foam::kOmegaSST-transition
 
 SourceFiles
-    WrayAgarwal.C
+    kOmegaSST-transition.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WrayAgarwal_H
-#define WrayAgarwal_H
+#ifndef kOmegaSST-transition_H
+#define kOmegaSST-transition_H
 
-#include "WrayAgarwalBase.H"
+#include "kOmegaSST.H"
 #include "RASModel.H"
 #include "eddyViscosity.H"
 
@@ -57,29 +51,18 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class WrayAgarwal Declaration
+                          Class kOmegaSST-transition Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class WrayAgarwal
+class kOmegaSST-transition
 :
-    public WrayAgarwalBase<
-            eddyViscosity<RASModel<BasicTurbulenceModel>>,
-            BasicTurbulenceModel
-            >
+    public Foam::kOmegaSST-transition
+    <
+        eddyViscosity<RASModel<BasicTurbulenceModel>>,
+        BasicTurbulenceModel
+    >
 {
-protected:
-
-    // Protected data
-
-            const volScalarField& y_;
-
-
-    // Protected Member Functions
-            tmp<volScalarField> F1(
-                const volScalarField& S
-            );
-
 
 public:
 
@@ -89,13 +72,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("WrayAgarwal");
+    TypeName("kOmegaSST-transition");
 
 
     // Constructors
 
         //- Construct from components
-        WrayAgarwal
+        kOmegaSST-transition
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -107,37 +90,10 @@ public:
             const word& type = typeName
         );
 
-        //- Disallow default bitwise copy construction
-        WrayAgarwal(const WrayAgarwal&) = delete;
-
 
     //- Destructor
-    virtual ~WrayAgarwal()
+    virtual ~kOmegaSST-transition()
     {}
-
-
-    // Member Functions
-
-        //- Read RASProperties dictionary
-        virtual bool read();
-
-        //- Return the effective diffusivity for R 
-        volScalarField nuEff
-		(
-		    const volScalarField& F1
-		 ) const;
-
-        //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct();
-
-        virtual tmp<volScalarField> k() const;
-
-        virtual tmp<volScalarField> epsilon() const;
-
-    // Member Operators
-
-        //- Disallow default bitwise assignment
-        void operator=(const WrayAgarwal&) = delete;
 };
 
 
@@ -148,8 +104,9 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #ifdef NoRepository
-#   include "WrayAgarwal.C"
+    #include "kOmegaSST-transition.C"
 #endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif
 

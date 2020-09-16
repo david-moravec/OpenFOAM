@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::WrayAgarwal
+    Foam::RASModels::WrayAgarwalBase
 
 Description
-       WrayAgarwalCoeffs
+       WrayAgarwalBaseCoeffs
         {
             sigmakW      0.72;
             sigmakEps    1.0;
@@ -38,14 +38,13 @@ Description
     \endverbatim
 
 SourceFiles
-    WrayAgarwal.C
+    WrayAgarwalBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WrayAgarwal_H
-#define WrayAgarwal_H
+#ifndef WrayAgarwalBase_H
+#define WrayAgarwalBase_H
 
-#include "WrayAgarwalBase.H"
 #include "RASModel.H"
 #include "eddyViscosity.H"
 
@@ -57,28 +56,51 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class WrayAgarwal Declaration
+                      Class WrayAgarwalBase Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class BasicTurbulenceModel>
-class WrayAgarwal
+template<class TurbulenceModel, class BasicTurbulenceModel>
+class WrayAgarwalBase
 :
-    public WrayAgarwalBase<
-            eddyViscosity<RASModel<BasicTurbulenceModel>>,
-            BasicTurbulenceModel
-            >
+    public TurbulenceModel
 {
 protected:
 
     // Protected data
 
-            const volScalarField& y_;
+        // Model coefficients
+            dimensionedScalar sigmakOm_;
+            dimensionedScalar sigmakEps_;
+            dimensionedScalar kappa_;
+            dimensionedScalar C1kOm_;
+            dimensionedScalar C1kEps_;
+            dimensionedScalar C2kOm_;
+            dimensionedScalar C2kEps_;
+            dimensionedScalar Cw_;
+            dimensionedScalar Cmu_;
+
+        // Fields
+
+            volScalarField R_;
+
+            //- Wall distance
+            //  Note: different to walBasel distance in parent RASModel
+            //  which is for near-walBasel cells only
 
 
     // Protected Member Functions
-            tmp<volScalarField> F1(
-                const volScalarField& S
-            );
+
+        virtual tmp<volScalarField> chi() const;
+
+        virtual tmp<volScalarField> Fmi(const volScalarField& chi) const;
+
+        virtual tmp<volScalarField> F1
+        (
+            const volScalarField& S
+        );
+
+        void correctNut(const volScalarField& fv1);
+        virtual void correctNut();
 
 
 public:
@@ -89,13 +111,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("WrayAgarwal");
+    TypeName("WrayAgarwalBase");
 
 
     // Constructors
 
         //- Construct from components
-        WrayAgarwal
+        WrayAgarwalBase
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -108,11 +130,11 @@ public:
         );
 
         //- Disallow default bitwise copy construction
-        WrayAgarwal(const WrayAgarwal&) = delete;
+        WrayAgarwalBase(const WrayAgarwalBase&) = delete;
 
 
     //- Destructor
-    virtual ~WrayAgarwal()
+    virtual ~WrayAgarwalBase()
     {}
 
 
@@ -137,7 +159,7 @@ public:
     // Member Operators
 
         //- Disallow default bitwise assignment
-        void operator=(const WrayAgarwal&) = delete;
+        void operator=(const WrayAgarwalBase&) = delete;
 };
 
 
@@ -147,10 +169,7 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-#ifdef NoRepository
-#   include "WrayAgarwal.C"
-#endif
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
 
 // ************************************************************************* //
