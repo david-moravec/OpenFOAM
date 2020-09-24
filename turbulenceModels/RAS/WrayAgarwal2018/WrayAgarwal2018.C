@@ -393,23 +393,3 @@ void WrayAgarwal2018<BasicTurbulenceModel>::correct()
 
 } // End namespace RASModels
 } // End namespace Foam
-
-#include "addToRunTimeSelectionTable.H"
-#include "makeTurbulenceModel.H"
-#include "RASModel.H"
-#include "transportModel.H"
-#include "incompressibleTurbulenceModel.H"
-#include "IncompressibleTurbulenceModel.H"
-
-namespace Foam
-{
-	typedef IncompressibleTurbulenceModel<transportModel>
-		transportModelIncompressibleTurbulenceModel;
-	typedef RASModel<transportModelIncompressibleTurbulenceModel>
-		RAStransportModelIncompressibleTurbulenceModel;
-}
-
-makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, WrayAgarval2018)
-
-
-// ************************************************************************* //
