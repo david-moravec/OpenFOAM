@@ -1,11 +1,41 @@
 !_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
-chi	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<BasicTurbulenceModel>::chi() const$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
-correctNut	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^void WrayAgarwalBase<BasicTurbulenceModel>::correctNut$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
-correctNut	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^void WrayAgarwalBase<BasicTurbulenceModel>::correctNut()$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
-epsilon	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<BasicTurbulenceModel>::epsilon() const$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
-Fmi	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<BasicTurbulenceModel>::Fmi$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
-Foam	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^namespace Foam$/;"	n	language:C++	file:
-k	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<BasicTurbulenceModel>::k() const$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
-nuEff	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^volScalarField WrayAgarwalBase<BasicTurbulenceModel>::nuEff$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
-RASModels	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^namespace RASModels$/;"	n	language:C++	namespace:Foam	file:
-read	/home/david/git/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^bool WrayAgarwalBase<BasicTurbulenceModel>::read()$/;"	f	language:C++	class:Foam::RASModels::WrayAgarwalBase
+alphaField	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^    typedef typename BasicTurbulenceModel::alphaField alphaField;$/;"	t	language:C++	class:Foam::WrayAgarwalBase
+C1kEps_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar C1kEps_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+C1kOm_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar C1kOm_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+C2kEps_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar C2kEps_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+C2kOm_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar C2kOm_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+chi	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::chi() const$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+chi	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual tmp<volScalarField> chi() const;$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+Cmu_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar Cmu_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+correct	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual void correct();$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+correctNut	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^void WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::correctNut$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+correctNut	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^void WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::correctNut()$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+correctNut	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual void correctNut();$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+correctNut	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        void correctNut(const volScalarField& fv1);$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+Cw_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar Cw_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+epsilon	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::epsilon() const$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+epsilon	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual tmp<volScalarField> epsilon() const;$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+F1	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual tmp<volScalarField> F1$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+Fmi	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::Fmi$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+Fmi	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual tmp<volScalarField> Fmi(const volScalarField& chi) const;$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+Foam	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^namespace Foam$/;"	n	language:C++	file:
+Foam	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^namespace Foam$/;"	n	language:C++
+k	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^tmp<volScalarField> WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::k() const$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+k	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual tmp<volScalarField> k() const;$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+kappa_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar kappa_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+nuEff	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^volScalarField WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::nuEff$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+nuEff	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        volScalarField nuEff$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+operator =	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        void operator=(const WrayAgarwalBase&) = delete;$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+read	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^bool WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::read()$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+read	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        virtual bool read();$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+rhoField	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^    typedef typename BasicTurbulenceModel::rhoField rhoField;$/;"	t	language:C++	class:Foam::WrayAgarwalBase
+R_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            volScalarField R_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+sigmakEps_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar sigmakEps_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+sigmakOm_	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^            dimensionedScalar sigmakOm_;$/;"	m	language:C++	class:Foam::WrayAgarwalBase
+transportModel	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^    typedef typename BasicTurbulenceModel::transportModel transportModel;$/;"	t	language:C++	class:Foam::WrayAgarwalBase
+WrayAgarwalBase	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.C	/^WrayAgarwalBase<TurbulenceModel, BasicTurbulenceModel>::WrayAgarwalBase$/;"	f	language:C++	class:Foam::WrayAgarwalBase
+WrayAgarwalBase	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        WrayAgarwalBase$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+WrayAgarwalBase	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^        WrayAgarwalBase(const WrayAgarwalBase&) = delete;$/;"	p	language:C++	class:Foam::WrayAgarwalBase
+WrayAgarwalBase	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^class WrayAgarwalBase$/;"	c	language:C++	namespace:Foam
+WrayAgarwalBase_H	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	46;"	d	language:C++
+~WrayAgarwalBase	/home/david/OpenFOAM/david-7/src/TurbulenceModels/turbulenceModels/Base/WrayAgarwal/WrayAgarwalBase.H	/^    virtual ~WrayAgarwalBase()$/;"	f	language:C++	class:Foam::WrayAgarwalBase

@@ -52,8 +52,6 @@ SourceFiles
 
 namespace Foam
 {
-namespace RASModels
-{
 
 /*---------------------------------------------------------------------------*\
                       Class WrayAgarwalBase Declaration
@@ -165,11 +163,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+#ifdef NoRepository
+#   include "WrayAgarwalBase.C"
+#endif
 #endif
 
 // ************************************************************************* //
