@@ -22,38 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::kOmegaTNT
+    Foam::RASModels::WrayAgarwal2018
 
 Description
-	kOmegaTNT
-
-    References:
-    \verbatim
-        Wilcox, D. C. (1998).
-        Turbulence modeling for CFD
-        (Vol. 2, pp. 103-217). La Canada, CA: DCW industries.
-    \endverbatim
-
-    The default model coefficients are
-    \verbatim
-        kOmegaTNTCoeffs
+       WrayAgarwal2018Coeffs
         {
-            Cmu         0.09;  // Equivalent to betaStar
-            alpha       0.52;
-            beta        0.072;
-            alphak      0.5;
-            alphaOmega  0.5;
-	    alphaD	0.5; //TNT coefficient
+            sigmakW      0.72;
+            sigmakEps    1.0;
+            kappa        0.41;
+            C1kOm        0.0829;
+            C1kEps       0.1127;
+            Cw           8.54;
+            Cmu          0.09;
+            Cm           8.0;
         }
     \endverbatim
 
 SourceFiles
-    kOmegaTNT.C
+    WrayAgarwal2018.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaTNT_H
-#define kOmegaTNT_H
+#ifndef WrayAgarwal2018_H
+#define WrayAgarwal2018_H
 
 #include "RASModel.H"
 #include "eddyViscosity.H"
@@ -66,41 +57,54 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kOmegaTNT Declaration
+                      Class WrayAgarwal2018 Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class kOmegaTNT
+class WrayAgarwal2018
 :
     public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
-
 protected:
 
     // Protected data
 
         // Model coefficients
-
+            dimensionedScalar sigmakOm_;
+            dimensionedScalar sigmakEps_;
+            dimensionedScalar kappa_;
+            dimensionedScalar C1kOm_;
+            dimensionedScalar C1kEps_;
+            dimensionedScalar C2kOm_;
+            dimensionedScalar C2kEps_;
+            dimensionedScalar Cw_;
             dimensionedScalar Cmu_;
-            dimensionedScalar beta_;
-            dimensionedScalar gamma_;
-            dimensionedScalar alphaK_;
-            dimensionedScalar alphaOmega_;
-	        dimensionedScalar alphaD_;
-
+            dimensionedScalar Cm_;
 
         // Fields
 
-            volScalarField k_;
-            volScalarField omega_;
+            volScalarField R_;
+
+            //- Wall distance
+            //  Note: different to wall distance in parent RASModel
+            //  which is for near-wall cells only
+            const volScalarField& y_;
 
 
     // Protected Member Functions
 
-//	virtual tmp<volScalarField> F_TNT(const volScalarField& CDkOmega) const; //TNT function does problems when declared
+        tmp<volScalarField> chi() const;
+
+        tmp<volScalarField> Fmi(const volScalarField& chi) const;
+
+        tmp<volScalarField> F1
+        (
+            const volScalarField& S,
+            const volScalarField& W
+        ) const;
+
+        void correctNut(const volScalarField& fv1);
         virtual void correctNut();
-        virtual tmp<fvScalarMatrix> kSource() const;
-        virtual tmp<fvScalarMatrix> omegaSource() const;
 
 
 public:
@@ -111,13 +115,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("kOmegaTNT");
+    TypeName("WrayAgarwal2018");
 
 
     // Constructors
 
         //- Construct from components
-        kOmegaTNT
+        WrayAgarwal2018
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -129,9 +133,12 @@ public:
             const word& type = typeName
         );
 
+        //- Disallow default bitwise copy construction
+        WrayAgarwal2018(const WrayAgarwal2018&) = delete;
+
 
     //- Destructor
-    virtual ~kOmegaTNT()
+    virtual ~WrayAgarwal2018()
     {}
 
 
@@ -140,51 +147,23 @@ public:
         //- Read RASProperties dictionary
         virtual bool read();
 
-        //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff() const
-        {
-            return volScalarField::New
-            (
-                "DkEff",
-                alphaK_*this->nut_ + this->nu()
-            );
-        }
-
-        //- Return the effective diffusivity for omega
-        tmp<volScalarField> DomegaEff() const
-        {
-            return volScalarField::New
-            (
-                "DomegaEff",
-                alphaOmega_*this->nut_ + this->nu()
-            );
-        }
-
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return k_;
-        }
-
-        //- Return the turbulence specific dissipation rate
-        virtual tmp<volScalarField> omega() const
-        {
-            return omega_;
-        }
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-            return volScalarField::New
-            (
-                "epsilon",
-                Cmu_*k_*omega_,
-                omega_.boundaryField().types()
-            );
-        }
+        //- Return the effective diffusivity for R 
+        volScalarField nuEff
+		(
+		    const volScalarField& F1
+		 ) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
+
+        virtual tmp<volScalarField> k() const;
+
+        virtual tmp<volScalarField> epsilon() const;
+
+    // Member Operators
+
+        //- Disallow default bitwise assignment
+        void operator=(const WrayAgarwal2018&) = delete;
 };
 
 
@@ -195,10 +174,9 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #ifdef NoRepository
-#   include "kOmegaTNT.C"
+#   include "WrayAgarwal2018.C"
 #endif
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //

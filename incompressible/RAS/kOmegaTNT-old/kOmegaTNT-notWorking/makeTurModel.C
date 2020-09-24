@@ -29,6 +29,7 @@ License
 
 #include "RASModel.H"
 #include "LESModel.H"
+<<<<<<< HEAD:incompressible/RAS/kOmegaTNT-old/kOmegaTNT-notWorking/makeTurModel.C
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #define createBaseTurbulenceModel(Alpha, Rho, baseModel, BaseModel, Transport) \
@@ -51,6 +52,30 @@ createBaseTurbulenceModel
 
 #define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
+=======
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+namespace Foam {
+  typedef TurbulenceModel<
+      geometricOneField,
+      geometricOneField,
+      incompressibleTurbulenceModel,
+      transportModel
+      > transportModelincompressibleTurbulenceModel;
+                        
+  typedef IncompressibleTurbulenceModel<transportModel> 
+  transportModelIncompressibleTurbulenceModel;
+                            
+  typedef RASModel<transportModelIncompressibleTurbulenceModel> 
+  RAStransportModelIncompressibleTurbulenceModel; 
+                                
+  typedef LESModel<transportModelIncompressibleTurbulenceModel> 
+  LEStransportModelIncompressibleTurbulenceModel; 
+                                    
+}
+                                    
+#define makeRASModel(Type)                                                 \
+    makeTemplatedTurbulenceModel                                           \
+>>>>>>> develop:incompressible/makeTurModel.C
     (transportModelIncompressibleTurbulenceModel, RAS, Type)
 
 #define makeLESModel(Type)                                                     \
@@ -64,4 +89,12 @@ createBaseTurbulenceModel
 #include "kOmegaTNT.H"
 makeRASModel(kOmegaTNT);
 
+<<<<<<< HEAD:incompressible/RAS/kOmegaTNT-old/kOmegaTNT-notWorking/makeTurModel.C
 // ************************************************************************* //
+=======
+#include "WrayAgarwal.H"
+makeRASModel(WrayAgarwal);
+
+#include "WrayAgarwal2018.H"
+makeRASModel(WrayAgarwal2018);
+>>>>>>> develop:incompressible/makeTurModel.C

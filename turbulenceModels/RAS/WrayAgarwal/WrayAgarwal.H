@@ -22,38 +22,28 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::kOmegaTNT
+    Foam::RASModels::WrayAgarwal
 
 Description
-	kOmegaTNT
-
-    References:
-    \verbatim
-        Wilcox, D. C. (1998).
-        Turbulence modeling for CFD
-        (Vol. 2, pp. 103-217). La Canada, CA: DCW industries.
-    \endverbatim
-
-    The default model coefficients are
-    \verbatim
-        kOmegaTNTCoeffs
+       WrayAgarwalCoeffs
         {
-            Cmu         0.09;  // Equivalent to betaStar
-            alpha       0.52;
-            beta        0.072;
-            alphak      0.5;
-            alphaOmega  0.5;
-	    alphaD	0.5; //TNT coefficient
+            sigmakW      0.72;
+            sigmakEps    1.0;
+            kappa        0.41;
+            C1kOm        0.0829;
+            C1kEps       0.1127;
+            Cw           8.54;
+            Cmu          0.09;
         }
     \endverbatim
 
 SourceFiles
-    kOmegaTNT.C
+    WrayAgarwal.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaTNT_H
-#define kOmegaTNT_H
+#ifndef WrayAgarwal_H
+#define WrayAgarwal_H
 
 #include "RASModel.H"
 #include "eddyViscosity.H"
@@ -66,41 +56,52 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kOmegaTNT Declaration
+                      Class WrayAgarwal Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class kOmegaTNT
+class WrayAgarwal
 :
     public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
-
 protected:
 
     // Protected data
 
         // Model coefficients
-
+            dimensionedScalar C1kOm_;
+            dimensionedScalar C1kEps_;
+            dimensionedScalar C2kOm_;
+            dimensionedScalar C2kEps_;
+            dimensionedScalar sigmakOm_;
+            dimensionedScalar sigmakEps_;
+            dimensionedScalar kappa_;
             dimensionedScalar Cmu_;
-            dimensionedScalar beta_;
-            dimensionedScalar gamma_;
-            dimensionedScalar alphaK_;
-            dimensionedScalar alphaOmega_;
-	        dimensionedScalar alphaD_;
-
+            dimensionedScalar Cw_;
 
         // Fields
 
-            volScalarField k_;
-            volScalarField omega_;
+            volScalarField R_;
+
+            //- Wall distance
+            //  Note: different to wall distance in parent RASModel
+            //  which is for near-wall cells only
+            const volScalarField& y_;
 
 
     // Protected Member Functions
 
-//	virtual tmp<volScalarField> F_TNT(const volScalarField& CDkOmega) const; //TNT function does problems when declared
+        tmp<volScalarField> chi() const;
+
+        tmp<volScalarField> Fmi(const volScalarField& chi) const;
+
+        tmp<volScalarField> F1
+        (
+            const volScalarField& S
+        );
+
+        void correctNut(const volScalarField& fv1);
         virtual void correctNut();
-        virtual tmp<fvScalarMatrix> kSource() const;
-        virtual tmp<fvScalarMatrix> omegaSource() const;
 
 
 public:
@@ -111,13 +112,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("kOmegaTNT");
+    TypeName("WrayAgarwal");
 
 
     // Constructors
 
         //- Construct from components
-        kOmegaTNT
+        WrayAgarwal
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -129,9 +130,12 @@ public:
             const word& type = typeName
         );
 
+        //- Disallow default bitwise copy construction
+        WrayAgarwal(const WrayAgarwal&) = delete;
+
 
     //- Destructor
-    virtual ~kOmegaTNT()
+    virtual ~WrayAgarwal()
     {}
 
 
@@ -140,51 +144,23 @@ public:
         //- Read RASProperties dictionary
         virtual bool read();
 
-        //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff() const
-        {
-            return volScalarField::New
-            (
-                "DkEff",
-                alphaK_*this->nut_ + this->nu()
-            );
-        }
-
-        //- Return the effective diffusivity for omega
-        tmp<volScalarField> DomegaEff() const
-        {
-            return volScalarField::New
-            (
-                "DomegaEff",
-                alphaOmega_*this->nut_ + this->nu()
-            );
-        }
-
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return k_;
-        }
-
-        //- Return the turbulence specific dissipation rate
-        virtual tmp<volScalarField> omega() const
-        {
-            return omega_;
-        }
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-            return volScalarField::New
-            (
-                "epsilon",
-                Cmu_*k_*omega_,
-                omega_.boundaryField().types()
-            );
-        }
+        //- Return the effective diffusivity for R 
+        volScalarField nuEff
+		(
+		    const volScalarField& F1
+		 ) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
+
+        virtual tmp<volScalarField> k() const;
+
+        virtual tmp<volScalarField> epsilon() const;
+
+    // Member Operators
+
+        //- Disallow default bitwise assignment
+        void operator=(const WrayAgarwal&) = delete;
 };
 
 
@@ -195,10 +171,9 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #ifdef NoRepository
-#   include "kOmegaTNT.C"
+#   include "WrayAgarwal.C"
 #endif
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //
