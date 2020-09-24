@@ -336,9 +336,9 @@ void WrayAgarval<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, R_)
       - fvm::laplacian(nuEff, R_)
      ==
-        alpha * rho * fvm::SuSp(C1 * S, R_)
-      + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
-      - alpha * rho * (1 - F1) * C2kEps_ * fvm::SuSp(R_ * magSqr(fvc::grad(S)) / sqr(S), R_)
+        alpha * rho * C1 * R_ * S 
+      + alpha * rho * F1 * C2kOm_ * R_ / S * CD_RS
+      - alpha * rho * (1 - F1) * C2kEps_ * fvm::Sp(R_ * magSqr(fvc::grad(S)) / sqr(S), R_)
     );
 
     REqn.ref().relax();

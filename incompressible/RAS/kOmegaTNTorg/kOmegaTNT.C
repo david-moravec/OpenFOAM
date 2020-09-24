@@ -330,8 +330,8 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
         alpha()*rho()*G
-//      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
- //     - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
+      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
+      - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
       + kSource()
       + fvOptions(alpha, rho, k_)
     );

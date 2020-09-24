@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "WrayAgarval.H"
+#include "WrayAgarval-old.H"
 #include "fvOptions.H"
 #include "bound.H"
 #include "wallDist.H"
@@ -38,14 +38,14 @@ namespace RASModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::chi() const
+tmp<volScalarField> WrayAgarval-old<BasicTurbulenceModel>::chi() const
 {
     return this->R_/this->nu();
 }
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::Fmi
+tmp<volScalarField> WrayAgarval-old<BasicTurbulenceModel>::Fmi
 (
     const volScalarField& chi
 ) const
@@ -56,7 +56,7 @@ tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::Fmi
 
 /*
 template<class BasicTurbulenceModel>j
-tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::F1
+tmp<volScalarField> WrayAgarval-old<BasicTurbulenceModel>::F1
 (
  	const volScalarField& S
  	const volScalarField& W
@@ -73,7 +73,7 @@ tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::F1
 */
 	
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::F1
+tmp<volScalarField> WrayAgarval-old<BasicTurbulenceModel>::F1
 (
  	const volScalarField& S
 )
@@ -85,7 +85,7 @@ tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::F1
 	);
 
 	volScalarField arg1 = (1 + this->y_ * sqrt(this->R_ * S) / this->nu()) /
-			      (1 + sqr( Max  / (20 * this->nu())));
+			      (1 + sqr( Max  / this->nu()));
 	
 	return tanh(pow(arg1, 4));
 }
@@ -93,7 +93,7 @@ tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::F1
 
 
 template<class BasicTurbulenceModel>
-void WrayAgarval<BasicTurbulenceModel>::correctNut
+void WrayAgarval-old<BasicTurbulenceModel>::correctNut
 (
  	const volScalarField& Fmi
 )
@@ -106,7 +106,7 @@ void WrayAgarval<BasicTurbulenceModel>::correctNut
 }
 	
 template<class BasicTurbulenceModel>
-void WrayAgarval<BasicTurbulenceModel>::correctNut()
+void WrayAgarval-old<BasicTurbulenceModel>::correctNut()
 {
 	correctNut(Fmi(this->chi()));
 }
@@ -114,7 +114,7 @@ void WrayAgarval<BasicTurbulenceModel>::correctNut()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-WrayAgarval<BasicTurbulenceModel>::WrayAgarval
+WrayAgarval-old<BasicTurbulenceModel>::WrayAgarval-old
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -233,7 +233,7 @@ WrayAgarval<BasicTurbulenceModel>::WrayAgarval
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool WrayAgarval<BasicTurbulenceModel>::read()
+bool WrayAgarval-old<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
@@ -257,18 +257,18 @@ bool WrayAgarval<BasicTurbulenceModel>::read()
 }
 
 template<class BasicTurbulenceModel>
-volScalarField WrayAgarval<BasicTurbulenceModel>::nuEff
+volScalarField WrayAgarval-old<BasicTurbulenceModel>::nuEff
 (
  const volScalarField& F1
 ) const
 {
 	volScalarField sigmaR = F1 * (sigmakOm_ - sigmakEps_) + sigmakEps_;
-	volScalarField nuEff = sigmaR * this->R_ + this->nu();
+	volScalarField nuEff = sigmaR * R_ + this->nu();
 	return nuEff;
 }
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::k() const
+tmp<volScalarField> WrayAgarval-old<BasicTurbulenceModel>::k() const
 {
     return volScalarField::New
     (
@@ -279,11 +279,11 @@ tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::k() const
 }
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::epsilon() const
+tmp<volScalarField> WrayAgarval-old<BasicTurbulenceModel>::epsilon() const
 {
     WarningInFunction
         << "Turbulence kinetic energy dissipation rate not defined for "
-        << "Wray-Agarval model. Returning zero field"
+        << "Wray-Agarval-old model. Returning zero field"
         << endl;
 
     return volScalarField::New
@@ -295,7 +295,7 @@ tmp<volScalarField> WrayAgarval<BasicTurbulenceModel>::epsilon() const
 }
 
 template<class BasicTurbulenceModel>
-void WrayAgarval<BasicTurbulenceModel>::correct()
+void WrayAgarval-old<BasicTurbulenceModel>::correct()
 {
     if (!this->turbulence_)
     {
@@ -336,9 +336,9 @@ void WrayAgarval<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, R_)
       - fvm::laplacian(nuEff, R_)
      ==
-        alpha * rho * fvm::SuSp(C1 * S, R_)
-      + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
-      - alpha * rho * (1 - F1) * C2kEps_ * fvm::SuSp(R_ * magSqr(fvc::grad(S)) / sqr(S), R_)
+        alpha * rho * C1 * R_ * S 
+      + alpha * rho * F1 * C2kOm_ * R_ / S * CD_RS
+      - alpha * rho * (1 - F1) * C2kEps_ * fvm::Sp(R_ * magSqr(fvc::grad(S)) / sqr(S), R_)
     );
 
     REqn.ref().relax();
@@ -372,7 +372,7 @@ namespace Foam
 		RAStransportModelIncompressibleTurbulenceModel;
 }
 
-makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, WrayAgarval)
+makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, WrayAgarval-old)
 
 
 // ************************************************************************* //

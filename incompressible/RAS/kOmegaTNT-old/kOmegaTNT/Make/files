@@ -1,0 +1,3 @@
+mykOmegaTNT.C
+
+LIB = $(FOAM_USER_LIBBIN)/libTestIncompressibleTurbulenceModels.so

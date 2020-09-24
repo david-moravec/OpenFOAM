@@ -1,5 +1,4 @@
-/*---------------------------------------------------------------------------*\
-  =========                 |
+/*---------------------------------------------------------------------------*\ =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
     \\  /    A nd           | Copyright (C) 2011-2019 OpenFOAM Foundation
@@ -23,7 +22,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kOmegaTNT.H"
+#include "mykOmegaTNT.H"
 #include "fvOptions.H"
 #include "bound.H"
 
@@ -37,38 +36,25 @@ namespace RASModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 // ************************ ///new Function// ************************ // 
-/*
+	/*
 template<class BasicTurbulenceModel>
 tmp<volScalarField> 
-kOmegaTNT<BasicTurbulenceModel>::F_TNT
+mykOmegaTNT<BasicTurbulenceModel>::F_TNT
 (
- const volScalarField& CDkOmega
+ const volScalarField& GGkOmega
 ) const
 { 
 	tmp<volScalarField> argTNT = max
 	(
-	 	CDkOmega,
-		dimensionedScalar(dimensionSet(0,0,-2,0,0,0,0), 0)
-	);
+	 	GGkOmega,
+		dimensionedScalar(dimensionSet(0,0,-3,0,0,0,0), 1.0e-10)
+	) * this->rho_ * this->alphaD_ / omega_ ;
 	return argTNT;
 }
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> 
-kOmegaTNT<BasicTurbulenceModel>::F_TNT
-(
- const volScalarField& CDkOmega
-) const
-{ 
-	tmp<volScalarField> argTNT = 
-	CDkOmega *this->rho_*alphaD_;
-	return argTNT;
-}
-*/
 // ****************************************************************** // 
-
+*/
 template<class BasicTurbulenceModel>
-void kOmegaTNT<BasicTurbulenceModel>::correctNut()
+void mykOmegaTNT<BasicTurbulenceModel>::correctNut()
 {
     this->nut_ = k_/omega_;
     this->nut_.correctBoundaryConditions();
@@ -79,7 +65,7 @@ void kOmegaTNT<BasicTurbulenceModel>::correctNut()
 
 
 template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::kSource() const
+tmp<fvScalarMatrix> mykOmegaTNT<BasicTurbulenceModel>::kSource() const
 {
     return tmp<fvScalarMatrix>
     (
@@ -94,7 +80,7 @@ tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::kSource() const
 
 
 template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::omegaSource() const
+tmp<fvScalarMatrix> mykOmegaTNT<BasicTurbulenceModel>::omegaSource() const
 {
     return tmp<fvScalarMatrix>
     (
@@ -110,7 +96,7 @@ tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::omegaSource() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
+mykOmegaTNT<BasicTurbulenceModel>::mykOmegaTNT
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -149,25 +135,25 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
         (
             "beta",
             this->coeffDict_,
-            0.072
+            0.075
         )
     ),
-    gamma_
+    gamma_    // changed from 0.53 
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma",
             this->coeffDict_,
-            0.52
+            0.553
         )
     ),
-    alphaK_
+    alphaK_  // changed
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK",
             this->coeffDict_,
-            0.5
+            2./3.
         )
     ),
     alphaOmega_
@@ -227,7 +213,7 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool kOmegaTNT<BasicTurbulenceModel>::read()
+bool mykOmegaTNT<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
@@ -248,7 +234,7 @@ bool kOmegaTNT<BasicTurbulenceModel>::read()
 
 
 template<class BasicTurbulenceModel>
-void kOmegaTNT<BasicTurbulenceModel>::correct()
+void mykOmegaTNT<BasicTurbulenceModel>::correct()
 {
     if (!this->turbulence_)
     {
@@ -283,21 +269,21 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
 
 // ************************ ///new scalar fields// ************************ // 
 
-    //implemantation of cross difusion term TNT
-    volScalarField CDkOmega = max( 
+    //implemantation of inner product of gradients
+/*    volScalarField GGkOmega
+    (
+     	(fvc::grad(k_) & fvc::grad(omega_))
+    );
+*/
+    volScalarField CDkOmega = max
+    ( 
 	this->alphaD_ / omega_ * fvc::grad(k_) & fvc::grad(omega_), 
 	dimensionedScalar(dimensionSet(0,0,-2,0,0,0,0), 0)
-	);
-    
-/*
-    volScalarField CDkOmega
-    (
-	(alphaD_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_ 
     );
 
     //initializing of F_TNT
-    volScalarField F_TNT(this->F_TNT(CDkOmega));
-*/
+//    volScalarField F_TNT(this->F_TNT(GGkOmega));
+
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn
     (
@@ -310,8 +296,8 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
       - fvm::Sp(beta_*alpha()*rho()*omega_(), omega_)
       + omegaSource()
       + fvOptions(alpha, rho, omega_)
-      + alpha * rho * CDkOmega
-//      + alpha()*rho()*F_TNT/omega_(), //TNT function
+      + rho * CDkOmega
+//      + F_TNT //TNT function
     );
 
     omegaEqn.ref().relax();
@@ -330,8 +316,8 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
         alpha()*rho()*G
-//      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
- //     - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
+      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
+      - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
       + kSource()
       + fvOptions(alpha, rho, k_)
     );
@@ -360,12 +346,11 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
 
 namespace Foam
 {
-	typedef IncompressibleTurbulenceModel<transportModel>
-		transportModelIncompressibleTurbulenceModel;
-	typedef RASModel<transportModelIncompressibleTurbulenceModel>
-		RAStransportModelIncompressibleTurbulenceModel;
+    typedef IncompressibleTurbulenceModel<transportModel> 
+	    transportModelIncompressibleTurbulenceModel;
+    typedef RASModel<transportModelIncompressibleTurbulenceModel> 
+	    RAStransportModelIncompressibleTurbulenceModel;
 }
 
-makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, kOmegaTNT)
-
+makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, mykOmegaTNT)
 // ************************************************************************* //

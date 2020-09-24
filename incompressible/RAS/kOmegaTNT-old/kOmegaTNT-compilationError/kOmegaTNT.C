@@ -149,25 +149,25 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
         (
             "beta",
             this->coeffDict_,
-            0.072
+            0.075
         )
     ),
-    gamma_
+    gamma_    // changed from 0.53 
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma",
             this->coeffDict_,
-            0.52
+            0.553
         )
     ),
-    alphaK_
+    alphaK_  // changed
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK",
             this->coeffDict_,
-            0.5
+            2./3.
         )
     ),
     alphaOmega_
@@ -185,7 +185,8 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
 	(
 	    "alphaD",
 	    this->coeffDict_,
-	    0.5
+	    // 0.5
+	    50
 	)
     ),
 
@@ -283,10 +284,10 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
 
 // ************************ ///new scalar fields// ************************ // 
 
-    //implemantation of cross difusion term TNT
+    //implemantation of inner product of gradients
     volScalarField CDkOmega = max( 
 	this->alphaD_ / omega_ * fvc::grad(k_) & fvc::grad(omega_), 
-	dimensionedScalar(dimensionSet(0,0,-2,0,0,0,0), 0)
+	dimensionedScalar(dimensionSet(0,0,-3,0,0,0,0), 0)
 	);
     
 /*
@@ -330,8 +331,8 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
         alpha()*rho()*G
-//      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
- //     - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
+      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
+      - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
       + kSource()
       + fvOptions(alpha, rho, k_)
     );
@@ -357,7 +358,6 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
 #include "transportModel.H"
 #include "incompressibleTurbulenceModel.H"
 #include "IncompressibleTurbulenceModel.H"
-
 namespace Foam
 {
 	typedef IncompressibleTurbulenceModel<transportModel>
@@ -367,5 +367,4 @@ namespace Foam
 }
 
 makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, kOmegaTNT)
-
 // ************************************************************************* //

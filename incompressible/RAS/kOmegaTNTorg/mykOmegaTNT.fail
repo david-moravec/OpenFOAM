@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kOmegaTNT.H"
+#include "mykOmegaTNT.H"
 #include "fvOptions.H"
 #include "bound.H"
 
@@ -40,7 +40,7 @@ namespace RASModels
 /*
 template<class BasicTurbulenceModel>
 tmp<volScalarField> 
-kOmegaTNT<BasicTurbulenceModel>::F_TNT
+mykOmegaTNT<BasicTurbulenceModel>::F_TNT
 (
  const volScalarField& CDkOmega
 ) const
@@ -55,7 +55,7 @@ kOmegaTNT<BasicTurbulenceModel>::F_TNT
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> 
-kOmegaTNT<BasicTurbulenceModel>::F_TNT
+mykOmegaTNT<BasicTurbulenceModel>::F_TNT
 (
  const volScalarField& CDkOmega
 ) const
@@ -68,7 +68,7 @@ kOmegaTNT<BasicTurbulenceModel>::F_TNT
 // ****************************************************************** // 
 
 template<class BasicTurbulenceModel>
-void kOmegaTNT<BasicTurbulenceModel>::correctNut()
+void mykOmegaTNT<BasicTurbulenceModel>::correctNut()
 {
     this->nut_ = k_/omega_;
     this->nut_.correctBoundaryConditions();
@@ -79,7 +79,7 @@ void kOmegaTNT<BasicTurbulenceModel>::correctNut()
 
 
 template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::kSource() const
+tmp<fvScalarMatrix> mykOmegaTNT<BasicTurbulenceModel>::kSource() const
 {
     return tmp<fvScalarMatrix>
     (
@@ -94,7 +94,7 @@ tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::kSource() const
 
 
 template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::omegaSource() const
+tmp<fvScalarMatrix> mykOmegaTNT<BasicTurbulenceModel>::omegaSource() const
 {
     return tmp<fvScalarMatrix>
     (
@@ -110,7 +110,7 @@ tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::omegaSource() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
+mykOmegaTNT<BasicTurbulenceModel>::mykOmegaTNT
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -149,25 +149,25 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
         (
             "beta",
             this->coeffDict_,
-            0.072
+            0.075
         )
     ),
-    gamma_
+    gamma_    // changed from 0.53 
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma",
             this->coeffDict_,
-            0.52
+            0.553
         )
     ),
-    alphaK_
+    alphaK_  // changed
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK",
             this->coeffDict_,
-            0.5
+            2./3.
         )
     ),
     alphaOmega_
@@ -185,7 +185,8 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
 	(
 	    "alphaD",
 	    this->coeffDict_,
-	    0.5
+	    // 0.5
+	    50
 	)
     ),
 
@@ -227,7 +228,7 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool kOmegaTNT<BasicTurbulenceModel>::read()
+bool mykOmegaTNT<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
@@ -248,7 +249,7 @@ bool kOmegaTNT<BasicTurbulenceModel>::read()
 
 
 template<class BasicTurbulenceModel>
-void kOmegaTNT<BasicTurbulenceModel>::correct()
+void mykOmegaTNT<BasicTurbulenceModel>::correct()
 {
     if (!this->turbulence_)
     {
@@ -283,10 +284,10 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
 
 // ************************ ///new scalar fields// ************************ // 
 
-    //implemantation of cross difusion term TNT
+    //implemantation of inner product of gradients
     volScalarField CDkOmega = max( 
 	this->alphaD_ / omega_ * fvc::grad(k_) & fvc::grad(omega_), 
-	dimensionedScalar(dimensionSet(0,0,-2,0,0,0,0), 0)
+	dimensionedScalar(dimensionSet(0,0,-3,0,0,0,0), 0)
 	);
     
 /*
@@ -330,8 +331,8 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
         alpha()*rho()*G
-//      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
- //     - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
+      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
+      - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
       + kSource()
       + fvOptions(alpha, rho, k_)
     );
@@ -366,6 +367,5 @@ namespace Foam
 		RAStransportModelIncompressibleTurbulenceModel;
 }
 
-makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, kOmegaTNT)
-
+makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, mykOmegaTNT)
 // ************************************************************************* //

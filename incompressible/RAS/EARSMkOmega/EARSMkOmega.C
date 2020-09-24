@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kOmegaTNT.H"
+#include "EARSMkOmega.H"
 #include "fvOptions.H"
 #include "bound.H"
 
@@ -37,10 +37,10 @@ namespace RASModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 // ************************ ///new Function// ************************ // 
-/*
+
 template<class BasicTurbulenceModel>
 tmp<volScalarField> 
-kOmegaTNT<BasicTurbulenceModel>::F_TNT
+EARSMkOmega<BasicTurbulenceModel>::F_TNT
 (
  const volScalarField& CDkOmega
 ) const
@@ -48,38 +48,99 @@ kOmegaTNT<BasicTurbulenceModel>::F_TNT
 	tmp<volScalarField> argTNT = max
 	(
 	 	CDkOmega,
-		dimensionedScalar(dimensionSet(0,0,-2,0,0,0,0), 0)
+		dimensionedScalar(dimensionSet(0,0,-3,0,0,0,0), 0)
 	);
-	return argTNT;
+	return (this->alphaD_ / omega_ * argTNT);
 }
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> 
-kOmegaTNT<BasicTurbulenceModel>::F_TNT
+volScalarField
+EARSMkOmega<BasicTurbulenceModel>::N
 (
- const volScalarField& CDkOmega
-) const
-{ 
-	tmp<volScalarField> argTNT = 
-	CDkOmega *this->rho_*alphaD_;
-	return argTNT;
-}
-*/
-// ****************************************************************** // 
+ const volScalarField P1,
+ const volScalarField P2,
+ const volScalarField A3p
+) const {
+	volScalarField Np = A3p / 3.;
 
+	forAll(Np, i)
+	{
+		if (P2[i] >= 0) {
+			scalar a = P1[i] + sqrt(P2[i]);
+			Np += pow(a, 1./3.) + sign(a) * pow(fabs(a), 1./3.);
+		}
+		
+		else {
+			scalar b = pow(P1[i], 2.) - P2[i];
+			Np += 2 * pow(b, 1./6.) * cos( 1./3. * acos( P1[i] / sqrt(b) ) );
+		}
+	};
+	return Np;
+}
+
+
+
+//nonlinear stress
 template<class BasicTurbulenceModel>
-void kOmegaTNT<BasicTurbulenceModel>::correctNut()
+volTensorField
+EARSMkOmega<BasicTurbulenceModel>::correctNonlinearStress(const volTensorField& gradU)
 {
-    this->nut_ = k_/omega_;
+	volScalarField tau(1. / (this->Cmu_ * omega_));
+
+	volSymmTensorField S(tau * symm(gradU));
+	volTensorField W(tau * skew(gradU));
+
+	volScalarField IIW( tr(W & W) );
+	volScalarField IIS( tr(S & S) );
+	volScalarField IV( tr(S & W & W) );	
+
+	scalar Cdiff = 2.2;
+	scalar Neq = 81./20.;
+
+	volScalarField beta1eq = -6./5. * ( Neq / (pow(Neq, 2.) - 2*IIW) );
+	volScalarField A3p =  9./5. + 9./4. * Cdiff * max( 1. + beta1eq * IIS, 0.0 );
+	volScalarField P1 = A3p * (pow(A3p, 2)/27. + 9./20. * IIS - 2./3. * IIW);
+	volScalarField P2 = sqr(P1) * pow( (sqr(A3p)/9. + 9./10. * IIS + 2./3. * IIW), 3);
+
+	volScalarField N = this->N(P1, P2, A3p);
+
+	volScalarField Q = 5./6. * (sqr(N) - 2 * IIW) * (2 * sqr(N) - IIW);
+	volScalarField beta1 = -N * (2* sqr(N) - 7 * IIW) / Q;
+	volScalarField beta3 = -12 * IV / (N * Q);
+	volScalarField beta4 = -2 * (sqr(N) - 2 * IIW) / Q;
+	volScalarField beta6 = -6 * N / Q;
+	volScalarField beta9 = 6 / Q;
+	
+	volScalarField Cmut = -0.5 * (beta1 + IIW * beta6);
+    	this->nut_ = Cmut / this->beta_ * this->rho_ * k_/omega_;
+    	this->nut_.correctBoundaryConditions();
+    	fv::options::New(this->mesh_).correct(this->nut_);
+
+	volTensorField nonlinearStress = beta3 * (W & W - 1./3. * IIW * I) + 
+			 		 beta4 * (S & W - W & S) +
+					 beta6 * (S & W & W + W & W & S - IIW * S - 2./3. * IV * I) +
+					 beta9 * (W & S & W & W - W & W & S & W);
+			   
+    	BasicTurbulenceModel::correctNut();
+
+	return nonlinearStress;
+}
+
+// ****************************************************************** // 
+/*
+template<class BasicTurbulenceModel>
+void EARSMkOmega<BasicTurbulenceModel>::correctNut()
+{
+    this->nut_ = Cmu / this->beta_ * this->rho_ * k_/omega_;
     this->nut_.correctBoundaryConditions();
     fv::options::New(this->mesh_).correct(this->nut_);
 
     BasicTurbulenceModel::correctNut();
 }
-
+*/
 
 template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::kSource() const
+tmp<fvScalarMatrix> EARSMkOmega<BasicTurbulenceModel>::kSource() const
 {
     return tmp<fvScalarMatrix>
     (
@@ -94,7 +155,7 @@ tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::kSource() const
 
 
 template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::omegaSource() const
+tmp<fvScalarMatrix> EARSMkOmega<BasicTurbulenceModel>::omegaSource() const
 {
     return tmp<fvScalarMatrix>
     (
@@ -110,7 +171,7 @@ tmp<fvScalarMatrix> kOmegaTNT<BasicTurbulenceModel>::omegaSource() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
+EARSMkOmega<BasicTurbulenceModel>::EARSMkOmega
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -122,7 +183,7 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
     const word& type
 )
 :
-    eddyViscosity<RASModel<BasicTurbulenceModel>>
+    nonlinearEddyViscosity<RASModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -149,25 +210,25 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
         (
             "beta",
             this->coeffDict_,
-            0.072
+            0.075
         )
     ),
-    gamma_
+    gamma_    // changed from 0.53 
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma",
             this->coeffDict_,
-            0.52
+            0.553
         )
     ),
-    alphaK_
+    alphaK_  // changed
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK",
             this->coeffDict_,
-            0.5
+            1.01
         )
     ),
     alphaOmega_
@@ -185,7 +246,7 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
 	(
 	    "alphaD",
 	    this->coeffDict_,
-	    0.5
+	    0.52
 	)
     ),
 
@@ -227,9 +288,9 @@ kOmegaTNT<BasicTurbulenceModel>::kOmegaTNT
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool kOmegaTNT<BasicTurbulenceModel>::read()
+bool EARSMkOmega<BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
+    if (nonlinearEddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
         Cmu_.readIfPresent(this->coeffDict());
         beta_.readIfPresent(this->coeffDict());
@@ -248,7 +309,7 @@ bool kOmegaTNT<BasicTurbulenceModel>::read()
 
 
 template<class BasicTurbulenceModel>
-void kOmegaTNT<BasicTurbulenceModel>::correct()
+void EARSMkOmega<BasicTurbulenceModel>::correct()
 {
     if (!this->turbulence_)
     {
@@ -263,7 +324,7 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
     volScalarField& nut = this->nut_;
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
+    nonlinearEddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
     volScalarField::Internal divU
     (
@@ -271,10 +332,13 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
     );
 
     tmp<volTensorField> tgradU = fvc::grad(U);
+
+    volTensorField nonlinearStress = this->correctNonlinearStress(tgradU);
+
     volScalarField::Internal G
     (
         this->GName(),
-        nut.v()*(dev(twoSymm(tgradU().v())) && tgradU().v())
+        nut.v()*(dev(twoSymm(tgradU().v())) && tgradU().v()) - nonlinearStress
     );
     tgradU.clear();
 
@@ -283,21 +347,22 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
 
 // ************************ ///new scalar fields// ************************ // 
 
-    //implemantation of cross difusion term TNT
-    volScalarField CDkOmega = max( 
-	this->alphaD_ / omega_ * fvc::grad(k_) & fvc::grad(omega_), 
-	dimensionedScalar(dimensionSet(0,0,-2,0,0,0,0), 0)
-	);
-    
-/*
+    //implemantation of cross difusion term
     volScalarField CDkOmega
     (
-	(alphaD_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_ 
+	fvc::grad(k_) & fvc::grad(omega_) 
     );
+/*
+    volScalarField CDkOmega = max
+    (
+	(this->alphaD_) / omega_  * (fvc::grad(k_) & fvc::grad(omega_)),
+        dimensionedScalar(dimensionSet(0,0,-2,0,0,0,0), 0)
+    );
+*/
 
     //initializing of F_TNT
     volScalarField F_TNT(this->F_TNT(CDkOmega));
-*/
+
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn
     (
@@ -310,8 +375,8 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
       - fvm::Sp(beta_*alpha()*rho()*omega_(), omega_)
       + omegaSource()
       + fvOptions(alpha, rho, omega_)
-      + alpha * rho * CDkOmega
-//      + alpha()*rho()*F_TNT/omega_(), //TNT function
+//      +	 alpha * rho * CDkOmega //TNT 
+      +	 alpha * rho * F_TNT //TNT 
     );
 
     omegaEqn.ref().relax();
@@ -330,8 +395,8 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
         alpha()*rho()*G
-//      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
- //     - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
+      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
+      - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
       + kSource()
       + fvOptions(alpha, rho, k_)
     );
@@ -360,12 +425,11 @@ void kOmegaTNT<BasicTurbulenceModel>::correct()
 
 namespace Foam
 {
-	typedef IncompressibleTurbulenceModel<transportModel>
-		transportModelIncompressibleTurbulenceModel;
-	typedef RASModel<transportModelIncompressibleTurbulenceModel>
-		RAStransportModelIncompressibleTurbulenceModel;
+    typedef IncompressibleTurbulenceModel<transportModel> 
+	    transportModelIncompressibleTurbulenceModel;
+    typedef RASModel<transportModelIncompressibleTurbulenceModel> 
+	    RAStransportModelIncompressibleTurbulenceModel;
 }
 
-makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, kOmegaTNT)
-
+makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, EARSMkOmega)
 // ************************************************************************* //
