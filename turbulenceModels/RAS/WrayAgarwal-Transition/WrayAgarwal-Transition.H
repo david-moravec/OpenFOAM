@@ -84,6 +84,7 @@ protected:
         // Fields
 
             volScalarField R_;
+            volScalarField gamma_;
 
             //- Wall distance
             //  Note: different to wall distance in parent RASModel

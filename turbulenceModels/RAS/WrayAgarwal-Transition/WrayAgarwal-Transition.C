@@ -253,6 +253,19 @@ WrayAgarwal-Transition<BasicTurbulenceModel>::WrayAgarwal-Transition
    	this->mesh_
    ),
 
+   gamma_
+   (
+   IOobject
+   	(
+   	 	"R",
+   		this->runTime_.timeName(),
+   		this->mesh_,
+   		IOobject::MUST_READ,
+   		IOobject::AUTO_WRITE
+   	),
+   	this->mesh_
+   ),
+
     y_(wallDist::New(this->mesh_).y())
 {
     if (type == typeName)
@@ -352,8 +365,13 @@ void WrayAgarwal-Transition<BasicTurbulenceModel>::correct()
 	    );
 
     const volScalarField W = sqrt(2 * skew(gradU) && skew(gradU));
+//functions for gamma
+    const volScalarField nuEff_gamma = this->nuEff_gamma(F1);
+	const volScalarField F_length = this->F_length();
+	const volScalarField F_onset = this->F_onset();
+	const volScalarField F_turb = this->F_turb();
 
-
+//functions for R
     const volScalarField F1 = this->F1(S, W);
     const volScalarField nuEff = this->nuEff(F1);
     const volScalarField Fmi = this->Fmi(this->chi());
@@ -366,6 +384,22 @@ void WrayAgarwal-Transition<BasicTurbulenceModel>::correct()
                             Cm_ * magSqr(fvc::grad(R_)) 
                             );
 
+    tmp<fvScalarMatrix> gammaEqn
+    (
+        fvm::ddt(alpha, rho, gamma_)
+      + fvm::div(alphaRhoPhi, gamma_)
+      - fvm::laplacian(alpha * rho * nuEff_gamma, gamma_)
+     ==
+        alpha * rho * F_onset * F_length * fvm::SuSp(S * (1 - gamma_), gamma_)
+      + alpha * rho * F_turb * Ca2_ * fvm::SuSp(Omega * (Ce2 * gamma_ - 1) , gamma)
+    );
+
+    gammaEqn.ref().relax();
+    fvOptions.constrain(gammaEqn.ref());
+    solve(gammaEqn);
+    fvOptions.correct(gamma_);
+    bound(gamma_, dimensionedScalar(gamma_.dimensions(), 0));
+    gamma_.correctBoundaryConditions();
     
     tmp<fvScalarMatrix> REqn
     (
