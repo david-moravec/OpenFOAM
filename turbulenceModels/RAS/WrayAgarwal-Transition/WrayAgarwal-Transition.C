@@ -365,6 +365,7 @@ void WrayAgarwal-Transition<BasicTurbulenceModel>::correct()
 	    );
 
     const volScalarField W = sqrt(2 * skew(gradU) && skew(gradU));
+
 //functions for gamma
     const volScalarField nuEff_gamma = this->nuEff_gamma(F1);
 	const volScalarField F_length = this->F_length();
@@ -378,11 +379,7 @@ void WrayAgarwal-Transition<BasicTurbulenceModel>::correct()
 
     const volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kEps_;
     const volScalarField CD_RS = fvc::grad(R_) & fvc::grad(S);
-    const volScalarField SS_RR = min
-                           (
-                            C2kEps_ * R_  * R_ * magSqr(fvc::grad(S)) / sqr(S),
-                            Cm_ * magSqr(fvc::grad(R_)) 
-                            );
+    const volScalarField SS = magSqr(fvc::grad(S)) / sqr(S);
 
     tmp<fvScalarMatrix> gammaEqn
     (
@@ -407,9 +404,10 @@ void WrayAgarwal-Transition<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, R_)
       - fvm::laplacian(alpha * rho * nuEff, R_)
      ==
-        alpha * rho * fvm::SuSp(C1 * S, R_)
+        alpha * rho * gamma_ * fvm::SuSp(C1 * S, R_)
       + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
-      - alpha * rho * (1 - F1) * SS_RR
+	  + P_lim()
+      - alpha * rho * max(gamma_, 0.1) * (1 - F1) * fvm::SuSp(C2kEps_ * R_ * SS, R_)
     );
 
     REqn.ref().relax();
