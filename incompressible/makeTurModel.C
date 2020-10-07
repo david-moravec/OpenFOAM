@@ -71,3 +71,6 @@ makeRASModel(WrayAgarwal);
 
 #include "WrayAgarwal2018.H"
 makeRASModel(WrayAgarwal2018);
+
+#include "WrayAgarwalTransition.H"
+makeRASModel(WrayAgarwalTransition);

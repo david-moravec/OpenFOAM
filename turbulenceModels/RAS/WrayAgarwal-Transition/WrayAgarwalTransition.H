@@ -98,23 +98,37 @@ protected:
     // Protected Member Functions
 
         tmp<volScalarField> chi() const;
-
         tmp<volScalarField> Fmi(const volScalarField& chi) const;
-
         tmp<volScalarField> F1
         (
             const volScalarField& S,
             const volScalarField& W
         ) const;
 
+        tmp<volScalarField> PR_lim
+        (
+            const volScalarField& Re_v,
+            const volScalarField& W
+        ) const;
+
 		tmp<volScalarField> F_onset
 		(
-		 	const volScalarField& Re_v
+		 	const volScalarField& Re_v,
+		 	const volScalarField& S
 		) const;
 
-		tmp<volScalarField>Tu_l() const;
+		tmp<volScalarField>Tu_l
+		(
+		 	const volScalarField& S
+		 ) const;
+
 		tmp<volScalarField>grad_p() const;
-		tmp<volScalarField>Re_theta() const;
+
+		tmp<volScalarField>Re_theta
+		(
+		 	const volScalarField& S
+		) const;
+
 		tmp<volScalarField>F_PG() const;
 
         void correctNut(const volScalarField& fv1);
