@@ -151,21 +151,25 @@ tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceMode>::F_PG
 	double C_PG1_lim = 1.5;
 	double C_PG2_lim = 3.0;
 
-	tmp<volScalarField> lam_theta_L = this->grad_p();
-	tmp<volScalarField> arg = DIM_SC(1) + C_PG1 * lam_theta_L;
-	tmp<volScalarField> arg2 = min(lam_theta_L + DIM_SC(0.0681), DIM_SC(0));
+	volScalarField lam_theta_L = this->grad_p();
+	
+	volScalarField arg2 = min(lam_theta_L + DIM_SC(0.0681), DIM_SC(0));
+	volScalarField F_PG = lam_theta_L;
 
-	forAll(N, i) {
+	forAll(lam_theta_L, i) {
 		if (lam_theta_L[i] >= 0) {
-			arg[i] = min(arg[i], DIM_SC(C_PG1_lim)[i]);
+			dimensionedScalar arg = DIM_SC(1) + C_PG1 * lam_theta_L[i];
+			F_PG[i] = min(arg.value(), C_PG1_lim);
 		}
 		else {
-			volScalarField F_PG = min(arg[i] + C_PG3 * arg2[i], DIM_SC(C_PG2_lim)[i]);
+			dimensionedScalar arg = DIM_SC(1) + C_PG2 * lam_theta_L[i];
+			dimensionedScalar arg2 = min(lam_theta_L[i] + DIM_SC(0.0681), DIM_SC(0));
+			F_PG[i] = min(arg.value() + C_PG3 * arg2.value(), C_PG2_lim);
 		}
 	}
-	bound(arg, dimensionedScalar("0", lam_theta_L.dimensions(), SMALL));
+	bound(F_PG, dimensionedScalar("0", lam_theta_L.dimensions(), SMALL));
 		
-	return arg;
+	return F_PG;
 	#undef DIM_SC
 }
 
