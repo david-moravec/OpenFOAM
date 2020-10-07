@@ -83,7 +83,8 @@ tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::PR_lim
 	volScalarField PR_lim = 1.5 * W * max(this->gamma_ - 0.2, DIM_SC_GAMM(0))
 						  * (1.0 - this->gamma_)
 						  * min(max(Re_v / 2420 - 1, DIM_SC_GAMM(0)), DIM_SC_GAMM(3))
-						  * max(3 * this->nu() - this->nut_, DIM_SC_GAMM(0));
+						  * max(3 * this->nu()- this->nut_, 
+								  dimensionedScalar("0", dimensionSet(0, 2, -1, 0, 0, 0, 0), 0));
 	return PR_lim;
 }
 
