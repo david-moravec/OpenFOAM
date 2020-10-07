@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::WrayAgarwal-Transition
+    Foam::RASModels::WrayAgarwalTransition
 
 Description
-       WrayAgarwal-TransitionCoeffs
+       WrayAgarwalTransitionCoeffs
         {
             sigmakW      0.72;
             sigmakEps    1.0;
@@ -39,12 +39,12 @@ Description
     \endverbatim
 
 SourceFiles
-    WrayAgarwal-Transition.C
+    WrayAgarwalTransition.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WrayAgarwal-Transition_H
-#define WrayAgarwal-Transition_H
+#ifndef WrayAgarwalTransition_H
+#define WrayAgarwalTransition_H
 
 #include "RASModel.H"
 #include "eddyViscosity.H"
@@ -57,11 +57,11 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class WrayAgarwal-Transition Declaration
+                      Class WrayAgarwalTransition Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class WrayAgarwal-Transition
+class WrayAgarwalTransition
 :
     public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
@@ -80,6 +80,9 @@ protected:
             dimensionedScalar Cw_;
             dimensionedScalar Cmu_;
             dimensionedScalar Cm_;
+            dimensionedScalar Ce2_;
+            dimensionedScalar Ca2_;
+            dimensionedScalar sigmaGamm_;
 
         // Fields
 
@@ -104,6 +107,16 @@ protected:
             const volScalarField& W
         ) const;
 
+		tmp<volScalarField> F_onset
+		(
+		 	const volScalarField& Re_v
+		) const;
+
+		tmp<volScalarField>Tu_l() const;
+		tmp<volScalarField>grad_p() const;
+		tmp<volScalarField>Re_theta() const;
+		tmp<volScalarField>F_PG() const;
+
         void correctNut(const volScalarField& fv1);
         virtual void correctNut();
 
@@ -116,13 +129,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("WrayAgarwal-Transition");
+    TypeName("WrayAgarwalTransition");
 
 
     // Constructors
 
         //- Construct from components
-        WrayAgarwal-Transition
+        WrayAgarwalTransition
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -135,11 +148,11 @@ public:
         );
 
         //- Disallow default bitwise copy construction
-        WrayAgarwal-Transition(const WrayAgarwal-Transition&) = delete;
+        WrayAgarwalTransition(const WrayAgarwalTransition&) = delete;
 
 
     //- Destructor
-    virtual ~WrayAgarwal-Transition()
+    virtual ~WrayAgarwalTransition()
     {}
 
 
@@ -149,7 +162,8 @@ public:
         virtual bool read();
 
         //- Return the effective diffusivity for R 
-        volScalarField nuEff
+		volScalarField nuEff_gamma() const;
+        volScalarField nuEff_R
 		(
 		    const volScalarField& F1
 		 ) const;
@@ -164,7 +178,7 @@ public:
     // Member Operators
 
         //- Disallow default bitwise assignment
-        void operator=(const WrayAgarwal-Transition&) = delete;
+        void operator=(const WrayAgarwalTransition&) = delete;
 };
 
 
@@ -175,7 +189,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #ifdef NoRepository
-#   include "WrayAgarwal-Transition.C"
+#   include "WrayAgarwalTransition.C"
 #endif
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif
