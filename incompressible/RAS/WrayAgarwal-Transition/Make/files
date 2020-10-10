@@ -1,0 +1,3 @@
+WrayAgarwalTransition.C
+
+LIB = $(FOAM_USER_LIBBIN)/WrayAgarwalTransitionDebug
