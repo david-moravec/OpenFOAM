@@ -1,0 +1,5 @@
+Allwmake /home/david/OpenFOAM/david-7/src/TurbulenceModels
+wmake libso turbulenceModels
+wmake libso incompressible
+Making dependency list for source file makeTurModel.C
+g++ -std=c++11 -m64 -Dlinux64 -DWM_ARCH_OPTION=64 -DWM_DP -DWM_LABEL_SIZE=32 -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof -Wno-attributes -O3  -DNoRepository -ftemplate-depth-100 -I../turbulenceModels/lnInclude -I/opt/openfoam7/src/TurbulenceModels/turbulenceModels/lnInclude -I/opt/openfoam7/src/TurbulenceModels/incompressible/lnInclude -I/opt/openfoam7/src/TurbulenceModels/incompressible/transportModel -I/opt/openfoam7/src/transportModels -I/opt/openfoam7/src/thermophysicalModels/basic/lnInclude -I/opt/openfoam7/src/finiteVolume/lnInclude -I/opt/openfoam7/src/meshTools/lnInclude -IlnInclude -I. -I/opt/openfoam7/src/OpenFOAM/lnInclude -I/opt/openfoam7/src/OSspecific/POSIX/lnInclude   -fPIC -c makeTurModel.C -o Make/linux64GccDPInt32Opt/makeTurModel.o
