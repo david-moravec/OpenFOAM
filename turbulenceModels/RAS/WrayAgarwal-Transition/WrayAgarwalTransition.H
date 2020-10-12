@@ -122,14 +122,14 @@ protected:
 		 	const volScalarField& S
 		 ) const;
 
-		tmp<volScalarField>grad_p() const;
+		tmp<volScalarField>p_param() const;
 
 		tmp<volScalarField>Re_theta
 		(
 		 	const volScalarField& S
 		) const;
 
-		tmp<volScalarField>F_PG() const;
+		volScalarField F_PG() const;
 
         void correctNut(const volScalarField& fv1);
         virtual void correctNut();
@@ -202,9 +202,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-#ifdef NoRepository
-#   include "WrayAgarwalTransition.C"
-#endif
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif
 
