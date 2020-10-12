@@ -32,8 +32,8 @@ namespace Foam
 {
 namespace RASModels
 {
-#define DIM_SC_GAMM(value) dimensionedScalar("value", dimensionSet(0, 2, -1, 0, 0, 0, 0), value)
-#define DIM_SC_R(value) dimensionedScalar("value", dimensionSet(0, 2, -3, 0, 0, 0, 0), value)
+#define DIM_SC_GAMM(value) dimensionedScalar("value", dimensionSet(0, 0, 0, 0, 0, 0, 0), value)
+#define DIM_SC_R(value) dimensionedScalar("value", dimensionSet(0, 2, -1, 0, 0, 0, 0), value)
 #define NO_DIM_SC(value) dimensionedScalar("value", dimensionSet(0, 0, 0, 0, 0, 0, 0), value)
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -66,8 +66,11 @@ tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::F1
 	volScalarField w = S / sqrt(Cmu_);
 	volScalarField eta = S * max(1.0 , mag(W / S));
 
-	tmp<volScalarField> arg1 = 0.5 * (this->nu() + this->R_) * sqr(eta) / 
-                          max(Cmu_ * k * w, DIM_SC_R(1e-16));
+	tmp<volScalarField> arg1 = 0.5 * (this->nu() + this->R_) * sqr(eta) 
+							 / max(
+								   Cmu_ * k * w, 
+								   dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0, 0, 0), SMALL)
+								  );
 	
 	return tanh(pow(arg1, 4));
 }
@@ -81,8 +84,8 @@ tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::PR_lim
 {
 	tmp<volScalarField> PR_lim = 1.5 * W * max(this->gamma_ - DIM_SC_GAMM(0.2), DIM_SC_GAMM(0))
 						  * (DIM_SC_GAMM(1.0) - this->gamma_)
-						  * min(max(this->nut_ / 2420 - DIM_SC_GAMM(1), DIM_SC_GAMM(0)), DIM_SC_GAMM(3))
-						  * max(3 * this->nu()- this->nut_, DIM_SC_GAMM(0));
+						  * min(max(Re_v / 2420 - DIM_SC_GAMM(1), DIM_SC_GAMM(0)), DIM_SC_GAMM(3))
+						  * max(3 * this->nu()- this->nut_, DIM_SC_R(0));
 								  
 	return PR_lim;
 }
