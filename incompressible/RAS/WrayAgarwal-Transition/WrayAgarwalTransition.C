@@ -347,7 +347,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    (
    IOobject
    	(
-   	 	"R",
+   	 	"gamma",
    		this->runTime_.timeName(),
    		this->mesh_,
    		IOobject::MUST_READ,
@@ -462,7 +462,6 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
 	    );
     const volScalarField W = sqrt(2 * skew(gradU) && skew(gradU));
 	const volScalarField Re_v = rho * sqr(this->y_) * S / this->nu();
-
 //functions for gamma
 	const volScalarField PR_lim = this->PR_lim(W, Re_v);
     const volScalarField nuEff_gamma = this->nuEff_gamma();
