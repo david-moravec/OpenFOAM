@@ -125,8 +125,8 @@ tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceMode>::p_param
 (
 ) const
 {
-	volScalarField volume_diff = this->nu() / sqr(this->y_);
-	tmp<volScalarField> arg = - 7.57 * 1e-3 * volume_diff * sqr(y_) / this->nu() 
+	volScalarField diff = symm(this->U_ * this-> U_) / magSqr(this->U_) && symm(fvc::grad(this->U_));
+	tmp<volScalarField> arg = - 7.57 * 1e-3 * diff * sqr(y_) / this->nu() 
 					   + NO_DIM_SC(0.0128);
 	return arg;
 }
