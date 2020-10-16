@@ -125,9 +125,11 @@ tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceMode>::p_param
 (
 ) const
 {
-	volScalarField diff = symm(this->U_ * this-> U_) / magSqr(this->U_) && symm(fvc::grad(this->U_));
-	tmp<volScalarField> arg = - 7.57 * 1e-3 * diff * sqr(y_) / this->nu() 
-					   + NO_DIM_SC(0.0128);
+	volScalarField diff = symm(this->U_ * this-> U_) && symm(fvc::grad(this->U_));
+	tmp<volScalarField> arg = - 7.57 * 1e-3 
+							* diff / (magSqr(this->U_) + dimensionedScalar("0", dimensionSet(0, 2, -2 , 0, 0, 0, 0), SMALL)) 
+							* sqr(y_) / this->nu() 
+					   		+ NO_DIM_SC(0.0128);
 	return arg;
 }
 
@@ -529,7 +531,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
 
 } // End namespace RASModels
 } // End namespace Foam
-/*
+
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 #include "RASModel.H"
@@ -546,4 +548,3 @@ namespace Foam
 }
 
 makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, WrayAgarwalTransition)
-*/
