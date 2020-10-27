@@ -149,7 +149,7 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceMode>::p_param
 		else if(arg[i] < -0.1) arg[i] = -0.1;
 	}
 	
-	return NO_DIM_SC(0.02);
+	return arg;
 }
 
 template<class BasicTurbulenceMode>
@@ -509,8 +509,8 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, gamma_)
       - fvm::laplacian(alpha * rho * nuEff_gamma, gamma_)
      ==
-        alpha * rho * F_onset * F_length * fvm::SuSp(S * (DIM_SC_GAMM(1) - gamma_), gamma_)
-      - alpha * rho * F_turb * Ca2_ * fvm::SuSp(W * (Ce2_ * gamma_ - DIM_SC_GAMM(1)) , gamma_)
+        alpha * rho * F_onset * F_length * S * (DIM_SC_GAMM(1) - gamma_) * gamma_
+      - alpha * rho * fvm::SuSp(F_turb * Ca2_ * W * Ce2_ * (gamma_ - DIM_SC_GAMM(1)) , gamma_)
     );
 
     gammaEqn.ref().relax();
@@ -526,8 +526,8 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, R_)
       - fvm::laplacian(alpha * rho * nuEff_R, R_)
      ==
-        alpha * rho * gamma_ * fvm::SuSp(C1 * S, R_)
-      + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
+        alpha * rho * gamma_ * (C1 * S * R_)
+      + alpha * rho * F1 * C2kOm_ / S * CD_RS * R_
 	  + PR_lim
       //- alpha * rho *  (1 - F1) * C2kEps_ * fvm::SuSp(min(R_ * SS, Cm_ * RR / R_), R_) 
       - alpha * rho *  (1 - F1) * C2kEps_ * min(sqr(R_) * SS, Cm_ * RR ) 
@@ -551,7 +551,6 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
 
 } // End namespace RASModels
 } // End namespace Foam
-/*
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 #include "RASModel.H"
@@ -568,4 +567,3 @@ namespace Foam
 }
 
 makeTemplatedTurbulenceModel(transportModelIncompressibleTurbulenceModel, RAS, WrayAgarwalTransition)
-	*/
