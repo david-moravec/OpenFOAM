@@ -122,7 +122,7 @@ protected:
 		 	const volScalarField& S
 		 ) const;
 
-		tmp<volScalarField>p_param() const;
+		volScalarField p_param() const;
 
 		tmp<volScalarField>Re_theta
 		(
