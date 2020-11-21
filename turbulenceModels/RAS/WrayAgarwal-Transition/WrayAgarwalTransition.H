@@ -70,15 +70,16 @@ protected:
     // Protected data
 
         // Model coefficients
+			dimensionedScalar Flength_;
+            dimensionedScalar C1kOm_;
+            dimensionedScalar C1kEps_;
             dimensionedScalar sigmakOm_;
             dimensionedScalar sigmakEps_;
             dimensionedScalar kappa_;
-            dimensionedScalar C1kOm_;
-            dimensionedScalar C1kEps_;
             dimensionedScalar C2kOm_;
             dimensionedScalar C2kEps_;
-            dimensionedScalar Cw_;
             dimensionedScalar Cmu_;
+            dimensionedScalar Comega_;
             dimensionedScalar Cm_;
             dimensionedScalar Ce2_;
             dimensionedScalar Ca2_;
@@ -93,45 +94,22 @@ protected:
             //  Note: different to wall distance in parent RASModel
             //  which is for near-wall cells only
             const volScalarField& y_;
+			const volVectorField& n_;
 
 
     // Protected Member Functions
 
-        tmp<volScalarField> chi() const;
-        tmp<volScalarField> Fmi(const volScalarField& chi) const;
-        tmp<volScalarField> F1
-        (
-            const volScalarField& S,
-            const volScalarField& W
-        ) const;
-
-        tmp<volScalarField> PR_lim
-        (
-            const volScalarField& Re_v,
-            const volScalarField& W
-        ) const;
-
-		tmp<volScalarField> F_onset
-		(
-		 	const volScalarField& Re_v,
-		 	const volScalarField& S
-		) const;
-
-		tmp<volScalarField>Tu_l
-		(
-		 	const volScalarField& S
-		 ) const;
-
-		tmp<volScalarField>p_param() const;
-
-		tmp<volScalarField>Re_theta
-		(
-		 	const volScalarField& S
-		) const;
-
+        volScalarField chi() const;
+		volScalarField Tu_l(const volScalarField& S) const;
+        volScalarField Fmi(const volScalarField& chi) const;
+		volScalarField Re_thetac(const volScalarField& S) const;
+        volScalarField F1 (const volScalarField& S, const volScalarField& W) const;
+		volScalarField F_onset(const volScalarField& Re_v,const volScalarField& S) const;
+        volScalarField PR_lim(const volScalarField& Re_v,const volScalarField& W) const;
+		volScalarField lambdaThetaL() const;
 		volScalarField F_PG() const;
 
-        void correctNut(const volScalarField& fv1);
+        void correctNut(const volScalarField& Fmi);
         virtual void correctNut();
 
 
@@ -175,12 +153,28 @@ public:
         //- Read RASProperties dictionary
         virtual bool read();
 
-        //- Return the effective diffusivity for R 
-		volScalarField nuEff_gamma() const;
-        volScalarField nuEff_R
-		(
-		    const volScalarField& F1
-		 ) const;
+        //- Return the effective diffusivity for R  and gamma
+		tmp<volScalarField> nuEff_gamma() const
+			{
+				 
+				return tmp<volScalarField>(
+						new volScalarField("nuEff_gamma", this->nu() + (this->nut_ / this->sigmaGamm_))
+						);
+			}
+        tmp<volScalarField> nuEff_R(const volScalarField& F1) const
+			{
+				volScalarField sigmaR = F1 * (sigmakOm_ - sigmakEps_) + sigmakEps_;
+				return tmp<volScalarField>(
+						new volScalarField ("nuEff", sigmaR * this->nut_ + this->nu())
+						);
+			}
+    	tmp<volScalarField> Rt() const
+			{
+				return tmp<volScalarField>
+					(
+						new volScalarField("Rt", this->R_ / this->nu()) 
+					);
+			}
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();

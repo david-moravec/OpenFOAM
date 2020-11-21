@@ -32,115 +32,104 @@ namespace Foam
 {
 namespace RASModels
 {
-#define DIM_SC_GAMM(value) dimensionedScalar("value", dimensionSet(0, 0, 0, 0, 0, 0, 0), value)
-#define DIM_SC_R(value) dimensionedScalar("value", dimensionSet(0, 2, -1, 0, 0, 0, 0), value)
-#define NO_DIM_SC(value) dimensionedScalar("value", dimensionSet(0, 0, 0, 0, 0, 0, 0), value)
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::chi() const
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::chi() const
 {
     return this->R_/this->nu();
 }
 
-
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::Fmi 
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::Fmi 
 (
     const volScalarField& chi
 ) const
 {
     const volScalarField chi3(pow3(chi));
-    return chi3/(chi3 + pow3(this->Cw_));
+    return chi3/(chi3 + pow3(this->Comega_));
 }
 
-
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::F1 
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1 
 (
  	const volScalarField& S,
  	const volScalarField& W
 ) const
 {
-	volScalarField k = this->nut_ * S / sqrt(Cmu_);
-	volScalarField w = S / sqrt(Cmu_);
+	volScalarField K = this->nut_ * S / sqrt(Cmu_);
+	volScalarField om = S / sqrt(Cmu_);
 	volScalarField eta = S * max(1.0 , mag(W / S));
+	volScalarField bounded_CmuKOm = max(Cmu_ * K * om, 
+			                            dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0, 0, 0), SMALL));
 
-	tmp<volScalarField> arg1 = 0.5 * (this->nu() + this->R_) * sqr(eta) 
-							 / max(
-								   Cmu_ * k * w, 
-								   dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0, 0, 0), SMALL)
-								  );
+	volScalarField arg1 = 0.5 * (this->nu() + this->R_) * sqr(eta) / bounded_CmuKOm;
 	
-	return tanh(pow(arg1, 4));
+	return tanh(pow4(arg1));
 }
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::PR_lim
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::PR_lim
 (
  	const volScalarField& W,
 	const volScalarField& Re_v
 ) const
 {
-	tmp<volScalarField> PR_lim = 1.5 * W * max(this->gamma_ - DIM_SC_GAMM(0.2), DIM_SC_GAMM(0))
-						  * (DIM_SC_GAMM(1.0) - this->gamma_)
-						  * min(max(Re_v / 2420 - DIM_SC_GAMM(1), DIM_SC_GAMM(0)), DIM_SC_GAMM(3))
-						  * max(3 * this->nu()- this->nut_, DIM_SC_R(0));
+	volScalarField F_Onlim = min(max(Re_v / 2420.0 - 1.0, 0.0), 3.0);
+	volScalarField PR_lim = 1.5 * W * max(this->gamma_ - 0.2, 0.0) * (1.0 - this->gamma_) * F_Onlim
+						  * max(3.0 * this->nu() - this->nut_, 0.*this->nu());
 								  
 	return PR_lim;
 }
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::F_onset
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F_onset
 (
  	const volScalarField& Re_v,
  	const volScalarField& S
 ) const
 {
-	tmp<volScalarField> Re_theta = this->Re_theta(S);
-	volScalarField R_T = this->nut_ / this->nu();
-		
-	tmp<volScalarField> F_onset1 = Re_v / (2.2*Re_theta);
-	tmp<volScalarField> F_onset2 = min(F_onset1, 2.0);
-	tmp<volScalarField> F_onset3 = max(1 - pow(R_T / 3.5, 3), NO_DIM_SC(0));
+	volScalarField F_onset1 = Re_v / (2.2*Re_thetac(S));
+	volScalarField F_onset2 = min(F_onset1, 2.0);
+	volScalarField F_onset3 = max(1.0 - pow3(Rt() / 3.5), 0.0);
 
-	return max(F_onset2 - F_onset3, NO_DIM_SC(0));
+	return max(F_onset2 - F_onset3, 0.0);
 }
 	
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::Re_theta
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::Re_thetac
 (
  	const volScalarField& S
 ) const
 {
 	volScalarField Tu_l = this->Tu_l(S);
 	volScalarField F_PG = this->F_PG();
-	tmp<volScalarField> arg = 100 + 1e3*Foam::exp(-1.0*Tu_l*F_PG); 
+	tmp<volScalarField> arg = 100. + 1000.*exp(-1.0*Tu_l*F_PG); 
 	return arg;
 }
 
 
 template<class BasicTurbulenceMode>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceMode>::p_param
+volScalarField WrayAgarwalTransition<BasicTurbulenceMode>::lambdaThetaL
 (
 ) const
 {
-	volScalarField diff = symm(this->U_ * this-> U_) && symm(fvc::grad(this->U_));
-	tmp<volScalarField> arg = - 7.57 * 1e-3 
-							* diff / (magSqr(this->U_) + dimensionedScalar("0", dimensionSet(0, 2, -2 , 0, 0, 0, 0), SMALL)) 
-							* sqr(y_) / this->nu() 
-					   		+ NO_DIM_SC(0.0128);
+	volScalarField dVdy = fvc::grad(this->U_ & n_) & n_;
+	volScalarField arg = -7.57e-3 * dVdy * sqr(y_) / this->nu() + 0.0128;
+
+	arg = min(max(arg, -1.0), 1.0);
+
 	return arg;
 }
 
 template<class BasicTurbulenceMode>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceMode>::Tu_l
+volScalarField WrayAgarwalTransition<BasicTurbulenceMode>::Tu_l
 (
  	const volScalarField& S
 ) const
 {
-	tmp<volScalarField> arg = 100 * sqrt(2*R_ / 3.0) / (sqrt(S / 0.3) * this->y_);
-	return min(arg, NO_DIM_SC(100));
+	volScalarField arg = 100. * sqrt(2.0*R_ / 3.0) / (sqrt(S / 0.3) * this->y_);
+	return min(arg, scalar(100.0));
 }
 
 template<class BasicTurbulenceMode>
@@ -148,32 +137,27 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceMode>::F_PG
 (
 ) const 
 {
-
 	double C_PG1 = 14.68;
 	double C_PG2 = -7.34;
 	double C_PG3 = 0.0;
 	double C_PG1_lim = 1.5;
 	double C_PG2_lim = 3.0;
 
-	volScalarField lam_theta_L = this->p_param();
-	
-	volScalarField arg2 = min(lam_theta_L + NO_DIM_SC(0.0681), NO_DIM_SC(0));
+	volScalarField lam_theta_L = this->lambdaThetaL();
 	volScalarField F_PG = lam_theta_L;
 
 	forAll(lam_theta_L, i) {
 		if (lam_theta_L[i] >= 0) {
-			dimensionedScalar arg = 1 + C_PG1 * lam_theta_L[i];
-			F_PG[i] = min(arg.value(), C_PG1_lim);
+			double arg = 1.0 + C_PG1 * lam_theta_L[i];
+			F_PG[i] = min(arg, C_PG1_lim);
 		}
 		else {
-			dimensionedScalar arg = 1 + C_PG2 * lam_theta_L[i];
-			dimensionedScalar arg2 = min(lam_theta_L[i] + 0.0681, 0);
-			F_PG[i] = min(arg.value() + C_PG3 * arg2.value(), C_PG2_lim);
+			double arg = 1.0 + C_PG2 * lam_theta_L[i];
+			double arg2 = min(lam_theta_L[i] + 0.0681, 0.0);
+			F_PG[i] = min(arg + C_PG3 * arg2, C_PG2_lim);
 		}
 	}
-	bound(F_PG, dimensionedScalar("0", lam_theta_L.dimensions(), SMALL));
-		
-	return F_PG;
+	return max(F_PG, scalar(0));
 }
 
 template<class BasicTurbulenceModel>
@@ -221,6 +205,15 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
         transport,
         propertiesName
     ),
+    Flength_
+    (
+       dimensioned<scalar>::lookupOrAddToDict
+    (
+   	 	"Flength",
+    	this->coeffDict_,
+    	100.0
+	)
+	),
 
     C1kOm_
     (
@@ -228,7 +221,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kOm",
    		this->coeffDict_,
-   		0.0833
+   		0.0829
    	)
    ),
 
@@ -241,19 +234,6 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    		0.1284
    	)
    ),
-
-   Cm_
-   (
-    	dimensioned<scalar>::lookupOrAddToDict
-   	(
-   	 	"Cm",
-   		this->coeffDict_,
-   		8.0
-   	)
-   ),
-
-   C2kOm_(C1kOm_ / sqr(kappa_) + sigmakOm_),  
-   C2kEps_(C1kEps_ / sqr(kappa_) + sigmakEps_),
 
    sigmakOm_
    (
@@ -275,6 +255,19 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	)
    ),
 
+   kappa_
+   (
+    	dimensioned<scalar>::lookupOrAddToDict
+   	(
+   	 	"kappa",
+   		this->coeffDict_,
+   		0.41	
+   	)
+   ),
+
+   C2kOm_(C1kOm_ / sqr(kappa_) + sigmakOm_),  
+   C2kEps_(C1kEps_ / sqr(kappa_) + sigmakEps_),
+
    Cmu_
    (
     	dimensioned<scalar>::lookupOrAddToDict
@@ -285,23 +278,23 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	)
    ),
 
-   Cw_
+   Comega_
    (
     	dimensioned<scalar>::lookupOrAddToDict
    	(
-   	 	"Cw",
+   	 	"Comega",
    		this->coeffDict_,
    		8.54
 		)
    ),
 
-   kappa_
+   Cm_
    (
     	dimensioned<scalar>::lookupOrAddToDict
    	(
-   	 	"kappa",
+   	 	"Cm",
    		this->coeffDict_,
-   		0.41	
+   		8.0
    	)
    ),
 
@@ -361,7 +354,9 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	this->mesh_
    ),
 
-    y_(wallDist::New(this->mesh_).y())
+   y_(wallDist::New(this->mesh_).y()),
+
+   n_(wallDist::New(this->mesh_).n())
 {
     if (type == typeName)
     {
@@ -376,16 +371,20 @@ bool WrayAgarwalTransition<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
+		Flength_.readIfPresent(this->coeffDict());
+        C1kOm_.readIfPresent(this->coeffDict());
+        C1kEps_.readIfPresent(this->coeffDict());
         sigmakOm_.readIfPresent(this->coeffDict());
         sigmakEps_.readIfPresent(this->coeffDict());
         kappa_.readIfPresent(this->coeffDict());
-        C1kOm_.readIfPresent(this->coeffDict());
-        C1kEps_.readIfPresent(this->coeffDict());
 	    C2kOm_ = C1kOm_ / sqr(kappa_) + sigmakOm_;
 	    C2kEps_ = C1kEps_ / sqr(kappa_) + sigmakEps_;
-        Cw_.readIfPresent(this->coeffDict());
         Cmu_.readIfPresent(this->coeffDict());
+        Comega_.readIfPresent(this->coeffDict());
         Cm_.readIfPresent(this->coeffDict());
+		Ce2_.readIfPresent(this->coeffDict());
+		Ca2_.readIfPresent(this->coeffDict());
+		sigmaGamm_.readIfPresent(this->coeffDict());
 
 
         return true;
@@ -394,26 +393,6 @@ bool WrayAgarwalTransition<BasicTurbulenceModel>::read()
     {
         return false;
     }
-}
-
-template<class BasicTurbulenceModel>
-volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::nuEff_gamma
-(
-) const
-{
-	volScalarField nueff = this->nu() + this->nut_ / this->sigmaGamm_;
-	return nueff;
-}
-
-template<class BasicTurbulenceModel>
-volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::nuEff_R
-(
- const volScalarField& F1
-) const
-{
-	volScalarField sigmaR = F1 * (sigmakOm_ - sigmakEps_) + sigmakEps_;
-	volScalarField nuEff = sigmaR * this->nut_ + this->nu();
-	return nuEff;
 }
 
 template<class BasicTurbulenceModel>
@@ -456,62 +435,34 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
+	volScalarField& R_ = this->R_;
+	volScalarField& gamma_ = this->gamma_;
+
     fv::options& fvOptions(fv::options::New(this->mesh_));
     eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
     volTensorField gradU = fvc::grad(U);
-    const volScalarField S = max
-	    (
-	 	sqrt(2 * symm(gradU) && symm(gradU)),
-		dimensionedScalar("1e-16", inv(dimTime), 1e-16)
-	    );
+    const volScalarField S = sqrt(2 * symm(gradU) && symm(gradU));
     const volScalarField W = sqrt(2 * skew(gradU) && skew(gradU));
-	const volScalarField Re_v = rho * sqr(this->y_) * S / this->nu();
-//functions for gamma
-	const volScalarField PR_lim = this->PR_lim(W, Re_v);
-    const volScalarField nuEff_gamma = this->nuEff_gamma();
-	const volScalarField F_onset = this->F_onset(Re_v, S);
-
-	const volScalarField F_turb = Foam::exp(0.5 * (-this->nut_/ this->nu()));
-	double F_length = 100; 
-
-//functions for R
+	const volScalarField Re_v = sqr(this->y_) * S / this->nu();
+	const volScalarField F_turb = exp(-(Rt()/2));
     const volScalarField F1 = this->F1(S, W);
-    const volScalarField nuEff_R = this->nuEff_R(F1);
-    const volScalarField Fmi = this->Fmi(this->chi());
-
-    const volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kEps_;
+    const volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kOm_;
+    
     const volScalarField CD_RS = fvc::grad(R_) & fvc::grad(S);
-    const volScalarField SS = magSqr(fvc::grad(S)) / sqr(S);
+    const volScalarField SS = magSqr(fvc::grad(S));
     const volScalarField RR = magSqr(fvc::grad(R_));
 
-    tmp<fvScalarMatrix> gammaEqn
-    (
-        fvm::ddt(alpha, rho, gamma_)
-      + fvm::div(alphaRhoPhi, gamma_)
-      - fvm::laplacian(alpha * rho * nuEff_gamma, gamma_)
-     ==
-        alpha * rho * F_onset * F_length * S * (DIM_SC_GAMM(1) - gamma_) * gamma_
-      - alpha * rho * fvm::SuSp(F_turb * Ca2_ * W * (Ce2_ * gamma_ - DIM_SC_GAMM(1)) , gamma_)
-    );
-
-    gammaEqn.ref().relax();
-    fvOptions.constrain(gammaEqn.ref());
-    solve(gammaEqn);
-    fvOptions.correct(gamma_);
-   // bound(gamma_, dimensionedScalar(gamma_.dimensions(), 0));
-    gamma_.correctBoundaryConditions();
-    
     tmp<fvScalarMatrix> REqn
     (
         fvm::ddt(alpha, rho, R_)
       + fvm::div(alphaRhoPhi, R_)
-      - fvm::laplacian(alpha * rho * nuEff_R, R_)
+      - fvm::laplacian(alpha * rho * nuEff_R(F1), R_)
      ==
-        alpha * rho * gamma_ * C1 * S * R_
-      + alpha * rho * F1 * C2kOm_ / S * CD_RS * R_
-	  + PR_lim
-      - alpha * rho * (1 - F1) * C2kEps_ * min(SS * sqr(R_), Cm_ * RR)
+        alpha * rho * gamma_ * C1 * R_*S
+      + alpha * rho * F1 * C2kOm_ * CD_RS * R_/S
+	  + PR_lim(W, Re_v)
+      - alpha * rho * (1 - F1) * C2kEps_ * min(sqr(R_/S) * SS, Cm_ * RR)
     );
 
     REqn.ref().relax();
@@ -521,11 +472,36 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     bound(R_, dimensionedScalar(R_.dimensions(), 0));
     R_.correctBoundaryConditions();
 
-    correctNut(Fmi);
+	const volScalarField Pgamma 
+	(
+        alpha() * rho() * F_onset(Re_v, S) * Flength_ * S * gamma_
+	);
+	const volScalarField Egamma
+	(
+      alpha() * rho() * F_turb * Ca2_ * W * gamma_ 
+	);
+
+    tmp<fvScalarMatrix> gammaEqn
+    (
+        fvm::ddt(alpha, rho, gamma_)
+      + fvm::div(alphaRhoPhi, gamma_)
+      - fvm::laplacian(alpha * rho * nuEff_gamma(), gamma_)
+     ==
+		Pgamma - fvm::Sp(Pgamma, gamma_)
+	  + Egamma - fvm::Sp(Ce2_ * Egamma, gamma_)
+    );
+
+    gammaEqn.ref().relax();
+    solve(gammaEqn);
+    bound(gamma_, dimensionedScalar(gamma_.dimensions(), 0));
+	gamma_.correctBoundaryConditions();
+
+    correctNut();
+    if (debug && this->runTime_.outputTime()) {
+        F_onset(Re_v, S)().write();
+        F_PG()().write();
+	}
 }
-#undef NO_DIM_SC
-#undef DIM_SC_R
-#undef DIM_SC_GAMM
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
