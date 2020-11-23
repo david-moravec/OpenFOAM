@@ -221,7 +221,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kOm",
    		this->coeffDict_,
-   		0.0829
+   		0.0833
    	)
    ),
 
@@ -231,7 +231,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kEps",
    		this->coeffDict_,
-   		0.1284
+   		0.1127
    	)
    ),
 
@@ -358,6 +358,8 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
 
    n_(wallDist::New(this->mesh_).n())
 {
+    //this->modifyCoeff(this->C1kEps_, 0.338);
+    //this->modifyCoeff(this->C1kOm_, 0.83);
     if (type == typeName)
     {
         this->printCoeffs(type);
@@ -442,8 +444,11 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
     volTensorField gradU = fvc::grad(U);
-    const volScalarField S = sqrt(2 * symm(gradU) && symm(gradU));
-    const volScalarField W = sqrt(2 * skew(gradU) && skew(gradU));
+    volScalarField S = sqrt(2 * symm(gradU) && symm(gradU));
+    volScalarField W = sqrt(2 * skew(gradU) && skew(gradU));
+	bound(S, dimensionedScalar("0", S.dimensions(), SMALL));
+	bound(W, dimensionedScalar("0", W.dimensions(), SMALL));
+
 	const volScalarField Re_v = sqr(this->y_) * S / this->nu();
 	const volScalarField F_turb = exp(-(Rt()/2));
     const volScalarField F1 = this->F1(S, W);
@@ -460,9 +465,10 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha * rho * nuEff_R(F1), R_)
      ==
         alpha * rho * gamma_ * C1 * R_*S
-      + alpha * rho * F1 * C2kOm_ * CD_RS * R_/S
+      + alpha * rho * max(gamma_, 0.1) * F1 * C2kOm_ * CD_RS * R_/S
 	  + PR_lim(W, Re_v)
-      - alpha * rho * (1 - F1) * C2kEps_ * min(sqr(R_/S) * SS, Cm_ * RR)
+      //- alpha * rho * (1 - F1) * C2kEps_ * min(sqr(R_/S) * SS, Cm_ * RR)
+      - alpha * rho * max(gamma_, 0.1) *  (1 - F1) * C2kEps_ * fvm::Sp(R_/sqr(S) * SS, R_)
     );
 
     REqn.ref().relax();

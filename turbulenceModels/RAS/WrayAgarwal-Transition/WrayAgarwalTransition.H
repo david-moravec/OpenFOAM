@@ -172,7 +172,7 @@ public:
 			{
 				return tmp<volScalarField>
 					(
-						new volScalarField("Rt", this->R_ / this->nu()) 
+						new volScalarField("Rt", this->nut_ / this->nu()) 
 					);
 			}
 
