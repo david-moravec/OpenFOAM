@@ -211,7 +211,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
     (
    	 	"Flength",
     	this->coeffDict_,
-    	100.0
+    	10.0
 	)
 	),
 
