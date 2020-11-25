@@ -211,7 +211,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
     (
    	 	"Flength",
     	this->coeffDict_,
-    	10.0
+    	.5
 	)
 	),
 
@@ -221,7 +221,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kOm",
    		this->coeffDict_,
-   		0.0833
+   		0.083
    	)
    ),
 
@@ -468,7 +468,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       + alpha * rho * min(gamma_, 1.) * F1 * C2kOm_ * RS * R_/S
 	  + PR_lim(W, Re_v)
       //- alpha * rho * (1 - F1) * C2kEps_ * min(sqr(R_/S) * SS, Cm_ * RR)
-      - alpha * rho * min(gamma_, 1.) *  (1 - F1) * C2kEps_ * fvm::Sp(R_/sqr(S) * SS, R_)
+      - alpha * rho * min(max(gamma_,0.1) 1.) *  (1 - F1) * C2kEps_ * fvm::Sp(R_/sqr(S) * SS, R_)
     );
 
     REqn.ref().relax();
