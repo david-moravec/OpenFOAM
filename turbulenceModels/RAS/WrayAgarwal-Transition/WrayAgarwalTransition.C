@@ -221,7 +221,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kOm",
    		this->coeffDict_,
-   		0.0829
+   		0.0833
    	)
    ),
 
@@ -465,9 +465,9 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha * rho * nuEff_R(F1), R_)
      ==
         alpha * rho * gamma_ * C1 * R_*S
-      + alpha * rho * max(gamma_, 0.1) * F1 * C2kOm_ * CD_RS * R_/S
+      + alpha * rho * F1 * C2kOm_ * CD_RS * R_/S
 	  + PR_lim(W, Re_v)
-      - alpha * rho * max(gamma_, 0.1) * (1 - F1) * C2kEps_ * min(sqr(R_/S) * SS, Cm_ * RR)
+      - alpha * rho * (1 - F1) * C2kEps_ * min(sqr(R_/S) * SS, Cm_ * RR)
       //- alpha * rho * max(gamma_, 0.1) *  (1 - F1) * C2kEps_ * fvm::Sp(R_/sqr(S) * SS, R_)
     );
 
@@ -477,6 +477,8 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     fvOptions.correct(R_);
     bound(R_, dimensionedScalar(R_.dimensions(), 0));
     R_.correctBoundaryConditions();
+
+    correctNut();
 
 	const volScalarField Pgamma 
 	(
@@ -502,7 +504,6 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     bound(gamma_, dimensionedScalar(gamma_.dimensions(), 0));
 	gamma_.correctBoundaryConditions();
 
-    correctNut();
     if (debug && this->runTime_.outputTime()) {
         F_onset(Re_v, S)().write();
         F_PG()().write();
