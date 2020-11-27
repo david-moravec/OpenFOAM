@@ -465,10 +465,10 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha * rho * nuEff_R(F1), R_)
      ==
         alpha * rho * gamma_ * C1 * R_*S
-      + alpha * rho * gamma_ * F1 * C2kOm_ * RS * R_/S
+      + alpha * rho * max(gamma_, 0.1) * F1 * C2kOm_ * RS * R_/S
 	  + PR_lim(W, Re_v)
       //- alpha * rho * (1 - F1) * C2kEps_ * min(sqr(R_/S) * SS, Cm_ * RR)
-      - alpha * rho * gamma_ * (1 - F1) * C2kEps_ * fvm::Sp(R_/sqr(S) * SS, R_)
+      - alpha * rho * max(gamma_, 0.1) * (1 - F1) * C2kEps_ * fvm::Sp(R_/sqr(S) * SS, R_)
     );
 
     REqn.ref().relax();
