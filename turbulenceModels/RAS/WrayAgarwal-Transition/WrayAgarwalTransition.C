@@ -497,7 +497,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       - fvm::laplacian(nuEff_R(F1), R_)
      ==
         alpha * gamma_ * rho * fvm::SuSp(C1 * S, R_)
-      + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
+      + alpha * gamma_ * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
 	  + PR_lim(W, Re_v)
       - alpha * rho * (1 - F1) * SS_RR
     );
