@@ -54,7 +54,6 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::Fmi
     return chi3/(chi3 + pow3(this->Cw_));
 }
 
-
 template<class BasicTurbulenceModel>
 volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 (
@@ -76,23 +75,20 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 	
 	return tanh(pow(arg1, 4));
 }
-
 /*
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::F1
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 (
- 	const volScalarField& S,
- 	const volScalarField& W
-)
+    const volScalarField& S,
+    const volScalarField& W 
+) const
 {
-    volScalarField eta = S * max(1.0, mag(W/S));
-    volScalarField Om = S / sqrt(Cmu_);
-    volScalarField k = this->nut_ * Om;
-    
-	volScalarField arg1 = (this->nut_ + this->R_) / 2. * sqr(eta) / (Cmu_  * k *  Om); 
+    const volScalarField eta = y_*sqrt(R_*S)/(20.0*this->nu());
 
-	return tanh(pow(arg1, 4));
+    const volScalarField arg = (1.0+20.0*eta)/(1.0+sqr(max(y_*sqrt(R_*S),1.5*R_)/(20.0*this->nu())));
+	return tanh(pow(arg, 4));
 }
+
 */
 
 template<class BasicTurbulenceModel>
@@ -103,7 +99,7 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::PR_lim
 ) const
 {
 	volScalarField F_Onlim = min(max(Re_v / 2420.0 - 1.0, 0.0), 3.0);
-	volScalarField PR_lim = 5. * W * max(this->gamma_ - 0.2, 0.0) * (1.0 - this->gamma_) * F_Onlim
+	volScalarField PR_lim = 1.5 * W * max(this->gamma_ - 0.2, 0.0) * (1.0 - this->gamma_) * F_Onlim
 						  * max(3.0 * this->nu() - this->nut_, 0.*this->nu());
 								  
 	return PR_lim;
@@ -238,7 +234,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
     (
    	 	"Flength",
     	this->coeffDict_,
-    	10.
+    	100.
 	)
 	),
 
@@ -501,9 +497,9 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha * rho * nuEff_R(F1), R_)
      ==
         alpha * gamma_ * rho * C1 * S * R_
-      + alpha * max(gamma_, scalar(1)) * rho * F1 * C2kOm_ / S * CD_RS * R_
+      + alpha *  rho * F1 * C2kOm_ / S * CD_RS * R_
 	  + PR_lim(W, Re_v)
-      - max(gamma_, scalar(1)) * alpha * rho * (1.0 - F1) * SS_RR_2018
+      - alpha * rho * (1.0 - F1) * SS_RR_2018
     );
 
     REqn.ref().relax();
