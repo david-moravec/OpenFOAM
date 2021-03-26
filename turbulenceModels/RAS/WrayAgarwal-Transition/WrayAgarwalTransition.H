@@ -79,7 +79,7 @@ protected:
             dimensionedScalar C2kOm_;
             dimensionedScalar C2kEps_;
             dimensionedScalar Cmu_;
-            dimensionedScalar Cw_;
+            dimensionedScalar Comega_;
             dimensionedScalar Cm_;
             dimensionedScalar Ce2_;
             dimensionedScalar Ca2_;
