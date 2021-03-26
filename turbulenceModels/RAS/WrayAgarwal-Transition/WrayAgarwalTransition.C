@@ -54,7 +54,6 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::Fmi
     return chi3/(chi3 + pow3(this->Comega_));
 }
 
-
 template<class BasicTurbulenceModel>
 volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 (
@@ -74,7 +73,6 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 	
 	return tanh(pow(arg1, 4));
 }
-
 /*
 
 template<class BasicTurbulenceModel>
@@ -85,10 +83,17 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 ) const
 {
     const volScalarField eta = y_*sqrt(R_*S)/(20.0*this->nu());
+<<<<<<< HEAD
     const volScalarField arg = (1.0+20.0*eta)/(1.0+sqr(max(y_*sqrt(R_*S),1.5*R_)/(20.0*this->nu())));
 
     return tanh(pow(arg, 4));
+=======
+
+    const volScalarField arg = (1.0+20.0*eta)/(1.0+sqr(max(y_*sqrt(R_*S),1.5*R_)/(20.0*this->nu())));
+	return tanh(pow(arg, 4));
+>>>>>>> c7b3d0b946ee1f5542247a791531f57da02bde26
 }
+
 */
 
 template<class BasicTurbulenceModel>
