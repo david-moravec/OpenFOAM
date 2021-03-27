@@ -250,7 +250,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kOm",
    		this->coeffDict_,
-   		0.0829
+   		0.0833
    	)
    ),
 
@@ -260,7 +260,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kEps",
    		this->coeffDict_,
-   		0.1127//0.1284
+   		0.1284//0.1284
    	)
    ),
 
