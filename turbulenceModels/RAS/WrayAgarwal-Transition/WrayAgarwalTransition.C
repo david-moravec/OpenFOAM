@@ -83,15 +83,8 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 ) const
 {
     const volScalarField eta = y_*sqrt(R_*S)/(20.0*this->nu());
-<<<<<<< HEAD
-    const volScalarField arg = (1.0+20.0*eta)/(1.0+sqr(max(y_*sqrt(R_*S),1.5*R_)/(20.0*this->nu())));
-
-    return tanh(pow(arg, 4));
-=======
-
     const volScalarField arg = (1.0+20.0*eta)/(1.0+sqr(max(y_*sqrt(R_*S),1.5*R_)/(20.0*this->nu())));
 	return tanh(pow(arg, 4));
->>>>>>> c7b3d0b946ee1f5542247a791531f57da02bde26
 }
 
 */
@@ -502,7 +495,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha * rho * nuEff_R(F1), R_)
      ==
         alpha * gamma_ * rho * fvm::SuSp(C1 * S, R_)
-      + alpha * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
+      + alpha * gamma_ * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
 	  + PR_lim(W, Re_v)
       - alpha * rho * (scalar(1.0) - F1) * SS_RR2018
     );
