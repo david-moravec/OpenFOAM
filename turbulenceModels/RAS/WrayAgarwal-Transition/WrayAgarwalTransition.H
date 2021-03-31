@@ -165,7 +165,7 @@ public:
 			{
 				volScalarField sigmaR = F1 * (sigmakOm_ - sigmakEps_) + sigmakEps_;
 				return tmp<volScalarField>(
-						new volScalarField ("nuEff", sigmaR * this->R_ + this->nu())
+						new volScalarField ("nuEff", sigmaR * this->nut_ + this->nu())
 						);
 			}
     	tmp<volScalarField> Rt() const

@@ -473,8 +473,11 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
 
 
 	const volScalarField Re_v = sqr(this->y_) * S / this->nu();
-	const volScalarField F_turb = exp(-(Rt()/2));
-    const volScalarField F1 = this->F1(S, W);
+	const volScalarField F_turb = exp(-pow4(Rt()/2));
+    volScalarField F1 = this->F1(S, W);
+    //F1 = min(F1, 0.1);
+    bound(F1,SMALL);
+
     const volScalarField Fmi = this->Fmi(this->chi());
 
     volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kEps_;
@@ -494,7 +497,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     (
         fvm::ddt(alpha, rho, R_)
       + fvm::div(alphaRhoPhi, R_)
-      - fvm::laplacian(nuEff_R(F1), R_)
+      - fvm::laplacian(alpha * rho* nuEff_R(F1), R_)
      ==
         alpha * gamma_ * rho * fvm::SuSp(C1 * S, R_)
       + alpha * gamma_ * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
@@ -534,7 +537,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     solve(gammaEqn);
     bound(gamma_, dimensionedScalar(gamma_.dimensions(), 0));
 	gamma_.correctBoundaryConditions();
-	//gamma_ = min(max(gamma_, scalar(1)), scalar(1));
+	gamma_ = min(gamma_, scalar(1.0));
 
 }
 
