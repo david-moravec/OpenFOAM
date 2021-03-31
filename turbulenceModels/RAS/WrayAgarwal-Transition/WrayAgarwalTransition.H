@@ -79,7 +79,7 @@ protected:
             dimensionedScalar C2kOm_;
             dimensionedScalar C2kEps_;
             dimensionedScalar Cmu_;
-            dimensionedScalar Cw_;
+            dimensionedScalar Comega_;
             dimensionedScalar Cm_;
             dimensionedScalar Ce2_;
             dimensionedScalar Ca2_;
@@ -165,14 +165,14 @@ public:
 			{
 				volScalarField sigmaR = F1 * (sigmakOm_ - sigmakEps_) + sigmakEps_;
 				return tmp<volScalarField>(
-						new volScalarField ("nuEff", sigmaR * this->R_ + this->nu())
+						new volScalarField ("nuEff", sigmaR * this->nut_ + this->nu())
 						);
 			}
     	tmp<volScalarField> Rt() const
 			{
 				return tmp<volScalarField>
 					(
-						new volScalarField("Rt", this->rho_ * this->nut_ / this->mu()) 
+						new volScalarField("Rt", this->nut_ / this->nu()) 
 					);
 			}
 
