@@ -75,6 +75,7 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 	
 	return tanh(pow(arg1, 4));
 }
+
 /*
 template<class BasicTurbulenceModel>
 volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
@@ -497,9 +498,9 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha * rho * nuEff_R(F1), R_)
      ==
         alpha * gamma_ * rho * C1 * S * R_
-      + alpha *  rho * F1 * C2kOm_ / S * CD_RS * R_
+      + alpha * gamma_ *  rho * F1 * C2kOm_ / S * CD_RS * R_
 	  + PR_lim(W, Re_v)
-      - alpha * rho * (1.0 - F1) * SS_RR_2018
+      - alpha * gamma_ *  rho * (1.0 - F1) * SS_RR_2018
     );
 
     REqn.ref().relax();
@@ -533,7 +534,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     gammaEqn.ref().relax();
     solve(gammaEqn);
     bound(gamma_, dimensionedScalar(gamma_.dimensions(), 0));
-	gamma_ = min(gamma_, scalar(1));
+	//gamma_ = min(gamma_, scalar(1));
 
 }
 
