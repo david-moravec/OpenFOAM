@@ -77,19 +77,18 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 
 /*
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::F1
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 (
  	const volScalarField& S,
  	const volScalarField& W
-)
+) const
 {
-    volScalarField eta = S * max(1.0, mag(W/S));
-    volScalarField Om = S / sqrt(Cmu_);
-    volScalarField k = this->nut_ * Om;
+    volScalarField h = y_*sqrt(R_*S);
+    volScalarField arg = max(h, 1.5*R_) / (20*this->nu());
+    volScalarField arg1 = (1 + h/this->nu()) / (1 + sqr(arg));
     
-	volScalarField arg1 = (this->nut_ + this->R_) / 2. * sqr(eta) / (Cmu_  * k *  Om); 
 
-	return tanh(pow(arg1, 4));
+	return min(tanh(pow(arg1, 4)), 0.9);
 }
 */
 
@@ -466,10 +465,10 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     volTensorField gradU = fvc::grad(U);
 
     volScalarField S = sqrt(2.0 * symm(gradU) && symm(gradU));
-	//bound(S, dimensionedScalar("S", S.dimensions(), SMALL));
+	bound(S, dimensionedScalar("S", S.dimensions(), SMALL));
 
     volScalarField W = sqrt(2.0 * skew(gradU) && skew(gradU));
-	//bound(W, dimensionedScalar("W", W.dimensions(), SMALL));
+	bound(W, dimensionedScalar("W", W.dimensions(), SMALL));
 
 
 	const volScalarField Re_v = sqr(this->y_) * S / this->nu();
