@@ -55,6 +55,7 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::Fmi
 }
 
 
+
 template<class BasicTurbulenceModel>
 volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 (
@@ -77,17 +78,16 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 
 /*
 template<class BasicTurbulenceModel>
-tmp<volScalarField> WrayAgarwalTransition<BasicTurbulenceModel>::F1
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 (
  	const volScalarField& S,
  	const volScalarField& W
-)
+) const
 {
-    volScalarField eta = S * max(1.0, mag(W/S));
-    volScalarField Om = S / sqrt(Cmu_);
-    volScalarField k = this->nut_ * Om;
+    volScalarField temp1 = y_ * sqrt(R_ * S);
+    volScalarField arg = max(temp1, 1.5*R_) / (20 * this->nu());
+    volScalarField arg1 = (1 + temp1/this->nu())/ 1+ sqr(arg);
     
-	volScalarField arg1 = (this->nut_ + this->R_) / 2. * sqr(eta) / (Cmu_  * k *  Om); 
 
 	return tanh(pow(arg1, 4));
 }
@@ -246,7 +246,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    	(
    	 	"C1kOm",
    		this->coeffDict_,
-   		0.0833
+   		0.0829
    	)
    ),
 
@@ -466,10 +466,10 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     volTensorField gradU = fvc::grad(U);
 
     volScalarField S = sqrt(2.0 * symm(gradU) && symm(gradU));
-	//bound(S, dimensionedScalar("S", S.dimensions(), SMALL));
+	bound(S, dimensionedScalar("S", S.dimensions(), SMALL));
 
     volScalarField W = sqrt(2.0 * skew(gradU) && skew(gradU));
-	//bound(W, dimensionedScalar("W", W.dimensions(), SMALL));
+	bound(W, dimensionedScalar("W", W.dimensions(), SMALL));
 
 
 	const volScalarField Re_v = sqr(this->y_) * S / this->nu();
@@ -482,7 +482,8 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
 
     volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kEps_;
     volScalarField CD_RS = fvc::grad(R_) & fvc::grad(S);
-    volScalarField SS_RR = min
+    volScalarField SS_RR2017 = C2kEps_ * R_  * R_ * magSqr(fvc::grad(S)) / sqr(S);
+    volScalarField SS_RR2018 = min
                            (
                             C2kEps_ * R_  * R_ * magSqr(fvc::grad(S)) / sqr(S),
                             Cm_ * magSqr(fvc::grad(R_)) 
@@ -502,7 +503,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
         alpha * gamma_ * rho * fvm::SuSp(C1 * S, R_)
       + alpha * gamma_ * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
 	  + PR_lim(W, Re_v)
-      - alpha * rho * (1 - F1) * SS_RR
+      - alpha * rho * (1 - F1) * SS_RR2018
     );
 
     REqn.ref().relax();
