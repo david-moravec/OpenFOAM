@@ -40,7 +40,7 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::chi() const
 {
-    return this->R_/this->nu();
+    return this->Rnu_/this->nu();
 }
 
 
@@ -67,7 +67,7 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 	volScalarField w = S / sqrt(Cmu_);
 	volScalarField eta = S * max(1.0 , mag(W / S));
 
-	volScalarField arg1 = 0.5 * (this->nu() + this->R_) * sqr(eta) / 
+	volScalarField arg1 = 0.5 * (this->nu() + this->Rnu_) * sqr(eta) / 
                           max(Cmu_ * k * w,
                               dimensionedScalar("SMALL", 
                                             dimensionSet(0, 2, -3, 0 ,0,0,0),       
@@ -84,8 +84,8 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
  	const volScalarField& W
 ) const
 {
-    volScalarField h = y_*sqrt(R_*S);
-    volScalarField arg = max(h, 1.5*R_) / (20*this->nu());
+    volScalarField h = y_*sqrt(Rnu_*S);
+    volScalarField arg = max(h, 1.5*Rnu_) / (20*this->nu());
     volScalarField arg1 = (1 + h/this->nu()) / (1 + sqr(arg));
 
 	return min(tanh(pow(arg1, 4)), 0.9);
@@ -93,17 +93,17 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
 */
 
 template<class BasicTurbulenceModel>
-volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::PR_lim
+volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::PRnu_lim
 (
  	const volScalarField& W,
 	const volScalarField& Re_v
 ) const
 {
 	volScalarField F_Onlim = min(max(Re_v / 2420.0 - 1.0, 0.0), 3.0);
-	volScalarField PR_lim = 1.5 * W * max(this->gamma_ - 0.2, 0.0) * (1.0 - this->gamma_) * F_Onlim
+	volScalarField PRnu_lim = 1.5 * W * max(this->gamma_ - 0.2, 0.0) * (1.0 - this->gamma_) * F_Onlim
 						  * max(3.0 * this->nu() - this->nut_, 0.*this->nu());
 								  
-	return PR_lim;
+	return PRnu_lim;
 }
 
 template<class BasicTurbulenceModel>
@@ -152,7 +152,7 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceMode>::Tu_l
  	const volScalarField& S
 ) const
 {
-	volScalarField arg = 100. * sqrt(2.0*R_ / 3.0) / (sqrt(S / 0.3) * this->y_);
+	volScalarField arg = 100. * sqrt(2.0*Rnu_ / 3.0) / (sqrt(S / 0.3) * this->y_);
 	return min(arg, scalar(100.0));
 }
 
@@ -190,7 +190,7 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correctNut
  	const volScalarField& Fmi
 )
 {
-	this->nut_ =  Fmi * this->R_;
+	this->nut_ =  Fmi * this->Rnu_;
 	this->nut_.correctBoundaryConditions();
 	fv::options::New(this->mesh_).correct(this->nut_);
 
@@ -352,7 +352,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
 	)
    ),
 
-   R_
+   Rnu_
    (
    IOobject
    	(
@@ -480,12 +480,12 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
     const volScalarField Fmi = this->Fmi(this->chi());
 
     volScalarField C1 = F1 * (C1kOm_ - C1kEps_) + C1kEps_;
-    volScalarField CD_RS = fvc::grad(R_) & fvc::grad(S);
-    volScalarField SS_RR2017 = C2kEps_ * R_  * R_ * magSqr(fvc::grad(S)) / sqr(S);
+    volScalarField CD_RS = fvc::grad(Rnu_) & fvc::grad(S);
+    volScalarField SS_RR2017 = C2kEps_ * Rnu_  * Rnu_ * magSqr(fvc::grad(S)) / sqr(S);
     volScalarField SS_RR2018 = min
                            (
-                            C2kEps_ * R_  * R_ * magSqr(fvc::grad(S)) / sqr(S),
-                            Cm_ * magSqr(fvc::grad(R_)) 
+                            C2kEps_ * Rnu_  * Rnu_ * magSqr(fvc::grad(S)) / sqr(S),
+                            Cm_ * magSqr(fvc::grad(Rnu_)) 
                             );
 
     
@@ -493,24 +493,24 @@ void WrayAgarwalTransition<BasicTurbulenceModel>::correct()
 	//	gamma_[i] = 1;
 	//};
 
-    tmp<fvScalarMatrix> REqn
+    tmp<fvScalarMatrix> RnuEqn
     (
-        fvm::ddt(alpha, rho, R_)
-      + fvm::div(alphaRhoPhi, R_)
-      - fvm::laplacian(alpha * rho* nuEff_R(F1), R_)
+        fvm::ddt(alpha, rho, Rnu_)
+      + fvm::div(alphaRhoPhi, Rnu_)
+      - fvm::laplacian(alpha * rho* nuEff_R(F1), Rnu_)
      ==
-        alpha * gamma_ * rho * fvm::SuSp(C1 * S, R_)
-      + alpha * gamma_ * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, R_)
-	  + PR_lim(W, Re_v)
+        alpha * gamma_ * rho * fvm::SuSp(C1 * S, Rnu_)
+      + alpha * gamma_ * rho * F1 * fvm::SuSp(C2kOm_ / S * CD_RS, Rnu_)
+	  + PRnu_lim(W, Re_v)
       - alpha * rho * (1 - F1) * SS_RR2018
     );
 
-    REqn.ref().relax();
-    fvOptions.constrain(REqn.ref());
-    solve(REqn);
-    fvOptions.correct(R_);
-    bound(R_, dimensionedScalar(R_.dimensions(), 0));
-    R_.correctBoundaryConditions();
+    RnuEqn.ref().relax();
+    fvOptions.constrain(RnuEqn.ref());
+    solve(RnuEqn);
+    fvOptions.correct(Rnu_);
+    bound(Rnu_, dimensionedScalar(Rnu_.dimensions(), 0));
+    Rnu_.correctBoundaryConditions();
 
     correctNut(Fmi);
 

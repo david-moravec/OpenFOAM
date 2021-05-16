@@ -87,7 +87,7 @@ protected:
 
         // Fields
 
-            volScalarField R_;
+            volScalarField Rnu_;
             volScalarField gamma_;
 
             //- Wall distance
@@ -105,7 +105,7 @@ protected:
 		volScalarField Re_thetac(const volScalarField& S) const;
         volScalarField F1 (const volScalarField& S, const volScalarField& W) const;
 		volScalarField F_onset(const volScalarField& Re_v,const volScalarField& S) const;
-        volScalarField PR_lim(const volScalarField& Re_v,const volScalarField& W) const;
+        volScalarField PRnu_lim(const volScalarField& Re_v,const volScalarField& W) const;
 		volScalarField lambdaThetaL() const;
 		volScalarField F_PG() const;
 
@@ -165,14 +165,14 @@ public:
 			{
 				volScalarField sigmaR = F1 * (sigmakOm_ - sigmakEps_) + sigmakEps_;
 				return tmp<volScalarField>(
-						new volScalarField ("nuEff", sigmaR * this->R_ + this->nu())
+						new volScalarField ("nuEff", sigmaR * this->Rnu_ + this->nu())
 						);
 			}
     	tmp<volScalarField> Rt() const
 			{
 				return tmp<volScalarField>
 					(
-						new volScalarField("Rt", this->R_ / this->nu()) 
+						new volScalarField("Rt", this->nut_ / this->nu()) 
 					);
 			}
 
