@@ -84,12 +84,11 @@ volScalarField WrayAgarwalTransition<BasicTurbulenceModel>::F1
  	const volScalarField& W
 ) const
 {
-    volScalarField temp1 = y_ * sqrt(R_ * S);
-    volScalarField arg = max(temp1, 1.5*R_) / (20 * this->nu());
-    volScalarField arg1 = (1 + temp1/this->nu())/ 1+ sqr(arg);
-    
+    volScalarField h = y_*sqrt(R_*S);
+    volScalarField arg = max(h, 1.5*R_) / (20*this->nu());
+    volScalarField arg1 = (1 + h/this->nu()) / (1 + sqr(arg));
 
-	return tanh(pow(arg1, 4));
+	return min(tanh(pow(arg1, 4)), 0.9);
 }
 */
 
