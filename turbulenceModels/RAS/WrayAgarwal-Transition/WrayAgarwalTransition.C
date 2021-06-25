@@ -356,7 +356,7 @@ WrayAgarwalTransition<BasicTurbulenceModel>::WrayAgarwalTransition
    (
    IOobject
    	(
-   	 	"R",
+   	 	"Rnu",
    		this->runTime_.timeName(),
    		this->mesh_,
    		IOobject::MUST_READ,
