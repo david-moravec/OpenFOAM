@@ -195,6 +195,9 @@ public:
 } // End namespace RASModels
 } // End namespace Foam
 
+#ifdef NoRepository
+#   include "WrayAgarwalTransition.C"
+#endif
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif
