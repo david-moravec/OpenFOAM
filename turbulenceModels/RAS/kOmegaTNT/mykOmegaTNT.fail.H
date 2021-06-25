@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::kOmegaTNTlimProd
+    Foam::RASModels::mykOmegaTNT
 
 Description
     Standard high Reynolds-number k-omega turbulence model for
@@ -37,7 +37,7 @@ Description
 
     The default model coefficients are
     \verbatim
-        kOmegaTNTlimProdCoeffs
+        mykOmegaTNTCoeffs
         {
             Cmu         0.09;  // Equivalent to betaStar
             alpha       0.52;
@@ -49,12 +49,12 @@ Description
     \endverbatim
 
 SourceFiles
-    kOmegaTNTlimProd.C
+    mykOmegaTNT.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaTNTlimProd_H
-#define kOmegaTNTlimProd_H
+#ifndef mykOmegaTNT_H
+#define mykOmegaTNT_H
 
 #include "RASModel.H"
 #include "eddyViscosity.H"
@@ -67,11 +67,11 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kOmegaTNTlimProd Declaration
+                           Class mykOmegaTNT Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class kOmegaTNTlimProd
+class mykOmegaTNT
 :
     public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
@@ -98,12 +98,11 @@ protected:
 
     // Protected Member Functions
 
+	virtual tmp<volScalarField> F_TNT(const volScalarField& GGkOmega) const;
         virtual void correctNut();
         virtual tmp<fvScalarMatrix> kSource() const;
         virtual tmp<fvScalarMatrix> omegaSource() const;
 
-//	virtual tmp<volScalarField> F_TNT(const volScalarField& CDkOmega) const; //TNT function does problems when declared
-	virtual tmp<volScalarField::Internal> Pk(const volScalarField::Internal& G) const;	
 
 public:
 
@@ -113,13 +112,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("kOmegaTNTlimProd");
+    TypeName("mykOmegaTNT");
 
 
     // Constructors
 
         //- Construct from components
-        kOmegaTNTlimProd
+        mykOmegaTNT
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -133,7 +132,7 @@ public:
 
 
     //- Destructor
-    virtual ~kOmegaTNTlimProd()
+    virtual ~mykOmegaTNT()
     {}
 
 
@@ -194,8 +193,6 @@ public:
 
 } // End namespace RASModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
